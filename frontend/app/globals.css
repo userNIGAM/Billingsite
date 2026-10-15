@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #edf7f0;
+  --color-brand-100: #d9eddf;
+  --color-brand-200: #b5ddc2;
+  --color-brand-300: #83c39a;
+  --color-brand-400: #50a970;
+  --color-brand-500: #2c8a52;
+  --color-brand-600: #237344;
+  --color-brand-700: #1d5d39;
+  --color-brand-800: #194a30;
+  --color-brand-900: #153d29;
+}
+
+:root {
+  --color-bg: #f5f7f4;
+  --color-text: #18251d;
+  color-scheme: light;
+}
+
+html {
+  min-height: 100%;
+  background: var(--color-bg);
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-feature-settings: "ss01" on;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: #d9eddf;
+  color: #153d29;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  scroll-margin-block: 1rem;
+}
+
+/* Printing a bill: drop the chrome, keep only the invoice sheet. */
+@media print {
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+}

@@ -1,0 +1,16 @@
+# Optional convenience: run a local MongoDB without installing it natively.
+# Start:  docker compose up -d
+# Stop:   docker compose down
+# Data persists in the "mongo-data" named volume between restarts.
+services:
+  mongo:
+    image: mongo:7
+    container_name: canteen-khata-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

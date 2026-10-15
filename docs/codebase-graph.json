@@ -1,0 +1,4724 @@
+{
+  "formatVersion": 1,
+  "description": "Local source-module dependency graph for the Canteen Khata backend and frontend.",
+  "generatedBy": "node scripts/graphify.mjs",
+  "scope": [
+    "backend/",
+    "frontend/"
+  ],
+  "exclusions": [
+    "node_modules/",
+    ".next/",
+    "dist/",
+    "coverage/",
+    "*.d.ts"
+  ],
+  "stats": {
+    "nodes": 162,
+    "edges": 620,
+    "unresolvedLocalImports": 1
+  },
+  "nodes": [
+    {
+      "id": "backend/.eslintrc.json",
+      "application": "backend",
+      "layer": ".eslintrc.json",
+      "extension": "json"
+    },
+    {
+      "id": "backend/app.ts",
+      "application": "backend",
+      "layer": "composition",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/config/db.ts",
+      "application": "backend",
+      "layer": "config",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/config/env.ts",
+      "application": "backend",
+      "layer": "config",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/auth.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/bill.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/boss.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/consumption.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/customer.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/dashboard.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/expense.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/item.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/khata.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/payment.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/report.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/settings.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/controllers/staff.controller.ts",
+      "application": "backend",
+      "layer": "controllers",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/jest.config.js",
+      "application": "backend",
+      "layer": "jest.config.js",
+      "extension": "js"
+    },
+    {
+      "id": "backend/middleware/auth.ts",
+      "application": "backend",
+      "layer": "middleware",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/middleware/csrf.ts",
+      "application": "backend",
+      "layer": "middleware",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/middleware/errorHandler.ts",
+      "application": "backend",
+      "layer": "middleware",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/middleware/rateLimit.ts",
+      "application": "backend",
+      "layer": "middleware",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/middleware/validate.ts",
+      "application": "backend",
+      "layer": "middleware",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/admin.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/auditLog.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/bill.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/boss.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/canteenProfile.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/consumptionTransaction.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/counter.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/dailyConsumption.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/expense.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/expenseCategory.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/index.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/inventoryItem.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/item.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/khata.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/payment.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/staff.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/models/stockMovement.model.ts",
+      "application": "backend",
+      "layer": "models",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/package-lock.json",
+      "application": "backend",
+      "layer": "package-lock.json",
+      "extension": "json"
+    },
+    {
+      "id": "backend/package.json",
+      "application": "backend",
+      "layer": "package.json",
+      "extension": "json"
+    },
+    {
+      "id": "backend/routes/auditLog.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/auth.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/bill.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/boss.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/consumption.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/customer.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/dashboard.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/expense.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/expenseCategory.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/health.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/index.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/item.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/khata.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/office.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/payment.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/report.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/settings.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/routes/staff.routes.ts",
+      "application": "backend",
+      "layer": "routes",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/seed/seed.ts",
+      "application": "backend",
+      "layer": "seed",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/server.ts",
+      "application": "backend",
+      "layer": "entrypoint",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/audit.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/auth.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/bill.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/consumption.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/counter.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/customer.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/dashboard.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/expense.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/item.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/khata.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/office.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/payment.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/period.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/report.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/services/settings.service.ts",
+      "application": "backend",
+      "layer": "services",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/src/services/period.service.ts",
+      "application": "backend",
+      "layer": "src",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/tests/canteen.integration.test.ts",
+      "application": "backend",
+      "layer": "tests",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/tests/env.setup.ts",
+      "application": "backend",
+      "layer": "tests",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/tests/health.test.ts",
+      "application": "backend",
+      "layer": "tests",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/tests/regressions.test.ts",
+      "application": "backend",
+      "layer": "tests",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/tests/setup.ts",
+      "application": "backend",
+      "layer": "tests",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/tsconfig.json",
+      "application": "backend",
+      "layer": "tsconfig.json",
+      "extension": "json"
+    },
+    {
+      "id": "backend/utils/ApiError.ts",
+      "application": "backend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/utils/asyncHandler.ts",
+      "application": "backend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/utils/date.ts",
+      "application": "backend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/utils/logger.ts",
+      "application": "backend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/utils/pagination.ts",
+      "application": "backend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/utils/paisa.ts",
+      "application": "backend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/utils/response.ts",
+      "application": "backend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/utils/transaction.ts",
+      "application": "backend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/auth.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/bill.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/common.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/consumption.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/expense.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/item.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/khata.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/office.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/payment.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/report.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "backend/validators/staff.validator.ts",
+      "application": "backend",
+      "layer": "validators",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/app/(admin)/audit-logs/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/bills/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/dashboard/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/expenses/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/items/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/khaja/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/khatas/new/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/khatas/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/layout.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/offices/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/payments/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/reports/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/settings/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(admin)/staff/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(auth)/layout.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(auth)/login/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/(auth)/setup/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/globals.css",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "css"
+    },
+    {
+      "id": "frontend/app/layout.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/app/page.tsx",
+      "application": "frontend",
+      "layer": "routes",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/layout/AdminShell.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/Badge.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/Button.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/Card.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/ConfirmDialog.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/EmptyState.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/Input.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/Modal.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/PageHeader.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/Pagination.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/Spinner.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/StatCard.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/components/ui/Table.tsx",
+      "application": "frontend",
+      "layer": "components",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/eslint.config.mjs",
+      "application": "frontend",
+      "layer": "eslint.config.mjs",
+      "extension": "mjs"
+    },
+    {
+      "id": "frontend/hooks/useAsync.ts",
+      "application": "frontend",
+      "layer": "hooks",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/hooks/useDebounce.ts",
+      "application": "frontend",
+      "layer": "hooks",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/lib/apiClient.ts",
+      "application": "frontend",
+      "layer": "lib",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/lib/services/authService.ts",
+      "application": "frontend",
+      "layer": "lib",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/lib/services/base.ts",
+      "application": "frontend",
+      "layer": "lib",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/lib/services/expenseService.ts",
+      "application": "frontend",
+      "layer": "lib",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/lib/services/insightService.ts",
+      "application": "frontend",
+      "layer": "lib",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/lib/services/khataService.ts",
+      "application": "frontend",
+      "layer": "lib",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/lib/services/operationService.ts",
+      "application": "frontend",
+      "layer": "lib",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/next.config.mjs",
+      "application": "frontend",
+      "layer": "next.config.mjs",
+      "extension": "mjs"
+    },
+    {
+      "id": "frontend/package-lock.json",
+      "application": "frontend",
+      "layer": "package-lock.json",
+      "extension": "json"
+    },
+    {
+      "id": "frontend/package.json",
+      "application": "frontend",
+      "layer": "package.json",
+      "extension": "json"
+    },
+    {
+      "id": "frontend/postcss.config.js",
+      "application": "frontend",
+      "layer": "postcss.config.js",
+      "extension": "js"
+    },
+    {
+      "id": "frontend/providers/AuthProvider.tsx",
+      "application": "frontend",
+      "layer": "providers",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/providers/Providers.tsx",
+      "application": "frontend",
+      "layer": "providers",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/providers/ToastProvider.tsx",
+      "application": "frontend",
+      "layer": "providers",
+      "extension": "tsx"
+    },
+    {
+      "id": "frontend/proxy.ts",
+      "application": "frontend",
+      "layer": "proxy.ts",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/tsconfig.json",
+      "application": "frontend",
+      "layer": "tsconfig.json",
+      "extension": "json"
+    },
+    {
+      "id": "frontend/types/api.ts",
+      "application": "frontend",
+      "layer": "types",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/utils/cn.ts",
+      "application": "frontend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/utils/date.ts",
+      "application": "frontend",
+      "layer": "utils",
+      "extension": "ts"
+    },
+    {
+      "id": "frontend/utils/money.ts",
+      "application": "frontend",
+      "layer": "utils",
+      "extension": "ts"
+    }
+  ],
+  "edges": [
+    {
+      "from": "backend/app.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/app.ts",
+      "to": "backend/middleware/errorHandler.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/app.ts",
+      "to": "backend/routes/index.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/config/db.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/config/db.ts",
+      "to": "backend/models/index.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/config/db.ts",
+      "to": "backend/utils/logger.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/auth.controller.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/auth.controller.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/controllers/auth.controller.ts",
+      "to": "backend/services/auth.service.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/auth.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/auth.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/bill.controller.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/bill.controller.ts",
+      "to": "backend/services/bill.service.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/bill.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/bill.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/boss.controller.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/boss.controller.ts",
+      "to": "backend/services/office.service.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/controllers/boss.controller.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/controllers/boss.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/boss.controller.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/boss.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/consumption.controller.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/consumption.controller.ts",
+      "to": "backend/services/consumption.service.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/consumption.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/consumption.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/customer.controller.ts",
+      "to": "backend/services/customer.service.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/customer.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/customer.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/dashboard.controller.ts",
+      "to": "backend/services/dashboard.service.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/dashboard.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/dashboard.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/expense.controller.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/expense.controller.ts",
+      "to": "backend/services/expense.service.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/expense.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/expense.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/item.controller.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/item.controller.ts",
+      "to": "backend/services/item.service.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/item.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/item.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/khata.controller.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/khata.controller.ts",
+      "to": "backend/services/khata.service.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/khata.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/khata.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/payment.controller.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/payment.controller.ts",
+      "to": "backend/services/payment.service.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/payment.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/payment.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/report.controller.ts",
+      "to": "backend/services/report.service.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/report.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/report.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/settings.controller.ts",
+      "to": "backend/services/audit.service.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/settings.controller.ts",
+      "to": "backend/services/settings.service.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/settings.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/settings.controller.ts",
+      "to": "backend/utils/pagination.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/controllers/settings.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/controllers/staff.controller.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/controllers/staff.controller.ts",
+      "to": "backend/services/office.service.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/controllers/staff.controller.ts",
+      "to": "backend/utils/asyncHandler.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/controllers/staff.controller.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/controllers/staff.controller.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/middleware/auth.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/middleware/auth.ts",
+      "to": "backend/models/admin.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/middleware/auth.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/middleware/csrf.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/middleware/csrf.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/middleware/errorHandler.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/middleware/errorHandler.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/middleware/errorHandler.ts",
+      "to": "backend/utils/logger.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/middleware/rateLimit.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/admin.model.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/admin.model.ts",
+      "kind": "re-export",
+      "line": 18
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/auditLog.model.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/auditLog.model.ts",
+      "kind": "re-export",
+      "line": 33
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "re-export",
+      "line": 26
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "re-export",
+      "line": 21
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/canteenProfile.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/canteenProfile.model.ts",
+      "kind": "re-export",
+      "line": 19
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/consumptionTransaction.model.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/consumptionTransaction.model.ts",
+      "kind": "re-export",
+      "line": 24
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/counter.model.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/counter.model.ts",
+      "kind": "re-export",
+      "line": 32
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/dailyConsumption.model.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/dailyConsumption.model.ts",
+      "kind": "re-export",
+      "line": 25
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/expense.model.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/expense.model.ts",
+      "kind": "re-export",
+      "line": 29
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/expenseCategory.model.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/expenseCategory.model.ts",
+      "kind": "re-export",
+      "line": 28
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/inventoryItem.model.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/inventoryItem.model.ts",
+      "kind": "re-export",
+      "line": 30
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/item.model.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/item.model.ts",
+      "kind": "re-export",
+      "line": 23
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "re-export",
+      "line": 20
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/payment.model.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/payment.model.ts",
+      "kind": "re-export",
+      "line": 27
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/staff.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/staff.model.ts",
+      "kind": "re-export",
+      "line": 22
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/stockMovement.model.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "backend/models/index.ts",
+      "to": "backend/models/stockMovement.model.ts",
+      "kind": "re-export",
+      "line": 31
+    },
+    {
+      "from": "backend/routes/auditLog.routes.ts",
+      "to": "backend/controllers/settings.controller.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/auditLog.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/auditLog.routes.ts",
+      "to": "backend/validators/report.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/auth.routes.ts",
+      "to": "backend/controllers/auth.controller.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/routes/auth.routes.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/routes/auth.routes.ts",
+      "to": "backend/middleware/rateLimit.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/auth.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/auth.routes.ts",
+      "to": "backend/validators/auth.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/bill.routes.ts",
+      "to": "backend/controllers/bill.controller.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/bill.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/bill.routes.ts",
+      "to": "backend/validators/bill.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/boss.routes.ts",
+      "to": "backend/controllers/boss.controller.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/routes/boss.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/boss.routes.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/routes/boss.routes.ts",
+      "to": "backend/validators/office.validator.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/consumption.routes.ts",
+      "to": "backend/controllers/consumption.controller.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/routes/consumption.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/consumption.routes.ts",
+      "to": "backend/validators/consumption.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/customer.routes.ts",
+      "to": "backend/controllers/customer.controller.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/customer.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/dashboard.routes.ts",
+      "to": "backend/controllers/dashboard.controller.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/expense.routes.ts",
+      "to": "backend/controllers/expense.controller.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/routes/expense.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/expense.routes.ts",
+      "to": "backend/validators/expense.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/expenseCategory.routes.ts",
+      "to": "backend/controllers/expense.controller.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/expenseCategory.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/expenseCategory.routes.ts",
+      "to": "backend/validators/expense.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/health.routes.ts",
+      "to": "backend/utils/response.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/middleware/csrf.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/auditLog.routes.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/auth.routes.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/bill.routes.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/boss.routes.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/consumption.routes.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/customer.routes.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/dashboard.routes.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/expense.routes.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/expenseCategory.routes.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/health.routes.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/item.routes.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/khata.routes.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/office.routes.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/payment.routes.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/report.routes.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/settings.routes.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "backend/routes/index.ts",
+      "to": "backend/routes/staff.routes.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/routes/item.routes.ts",
+      "to": "backend/controllers/item.controller.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/item.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/item.routes.ts",
+      "to": "backend/validators/item.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/khata.routes.ts",
+      "to": "backend/controllers/khata.controller.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/routes/khata.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/khata.routes.ts",
+      "to": "backend/validators/khata.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/office.routes.ts",
+      "to": "backend/controllers/boss.controller.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/routes/office.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/office.routes.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/routes/office.routes.ts",
+      "to": "backend/validators/office.validator.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/payment.routes.ts",
+      "to": "backend/controllers/payment.controller.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/payment.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/payment.routes.ts",
+      "to": "backend/validators/payment.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/report.routes.ts",
+      "to": "backend/controllers/dashboard.controller.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/routes/report.routes.ts",
+      "to": "backend/controllers/report.controller.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/report.routes.ts",
+      "to": "backend/controllers/settings.controller.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/routes/report.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/routes/report.routes.ts",
+      "to": "backend/validators/report.validator.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/settings.routes.ts",
+      "to": "backend/controllers/settings.controller.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/routes/settings.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/staff.routes.ts",
+      "to": "backend/controllers/staff.controller.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/routes/staff.routes.ts",
+      "to": "backend/middleware/validate.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/routes/staff.routes.ts",
+      "to": "backend/validators/staff.validator.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/models/admin.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/models/canteenProfile.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/services/bill.service.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/services/consumption.service.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/services/expense.service.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/services/item.service.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/services/khata.service.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/services/office.service.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/services/payment.service.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/services/period.service.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "backend/seed/seed.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "backend/server.ts",
+      "to": "backend/app.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/server.ts",
+      "to": "backend/config/db.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/server.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "backend/server.ts",
+      "to": "backend/utils/logger.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/audit.service.ts",
+      "to": "backend/models/auditLog.model.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "backend/services/audit.service.ts",
+      "to": "backend/utils/logger.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/auth.service.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/auth.service.ts",
+      "to": "backend/models/admin.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/auth.service.ts",
+      "to": "backend/services/audit.service.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/auth.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/models/dailyConsumption.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/models/payment.model.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/services/audit.service.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/services/counter.service.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/services/period.service.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/utils/pagination.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/services/bill.service.ts",
+      "to": "backend/utils/transaction.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/models/consumptionTransaction.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/models/dailyConsumption.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/models/item.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/services/audit.service.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/services/counter.service.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/services/customer.service.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/utils/pagination.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/utils/paisa.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/services/consumption.service.ts",
+      "to": "backend/utils/transaction.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/services/counter.service.ts",
+      "to": "backend/models/counter.model.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "backend/services/counter.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/customer.service.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/customer.service.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "backend/services/customer.service.ts",
+      "to": "backend/models/staff.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/customer.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/customer.service.ts",
+      "to": "backend/utils/pagination.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/customer.service.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/dashboard.service.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/dashboard.service.ts",
+      "to": "backend/models/dailyConsumption.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/dashboard.service.ts",
+      "to": "backend/models/expense.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/dashboard.service.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/dashboard.service.ts",
+      "to": "backend/models/payment.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/dashboard.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/services/expense.service.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/services/expense.service.ts",
+      "to": "backend/models/expense.model.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "backend/services/expense.service.ts",
+      "to": "backend/models/expenseCategory.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/expense.service.ts",
+      "to": "backend/services/audit.service.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/expense.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/expense.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/expense.service.ts",
+      "to": "backend/utils/pagination.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/item.service.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/item.service.ts",
+      "to": "backend/models/item.model.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "backend/services/item.service.ts",
+      "to": "backend/services/audit.service.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/item.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/item.service.ts",
+      "to": "backend/utils/pagination.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/models/consumptionTransaction.model.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/models/dailyConsumption.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/models/payment.model.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/models/staff.model.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/services/audit.service.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/services/counter.service.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/services/office.service.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/services/period.service.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/utils/pagination.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/services/khata.service.ts",
+      "to": "backend/utils/transaction.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/models/consumptionTransaction.model.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/models/staff.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/services/audit.service.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/services/office.service.ts",
+      "to": "backend/utils/pagination.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/middleware/auth.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/models/payment.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/services/audit.service.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/services/counter.service.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/utils/pagination.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/services/payment.service.ts",
+      "to": "backend/utils/transaction.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/services/period.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/report.service.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/services/report.service.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/services/report.service.ts",
+      "to": "backend/models/dailyConsumption.model.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/services/report.service.ts",
+      "to": "backend/models/expense.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/services/report.service.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/services/report.service.ts",
+      "to": "backend/models/payment.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/services/report.service.ts",
+      "to": "backend/models/staff.model.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/services/report.service.ts",
+      "to": "backend/utils/ApiError.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/services/report.service.ts",
+      "to": "backend/utils/date.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "backend/services/settings.service.ts",
+      "to": "backend/models/canteenProfile.model.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "backend/tests/canteen.integration.test.ts",
+      "to": "backend/app.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/tests/canteen.integration.test.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/tests/canteen.integration.test.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/tests/canteen.integration.test.ts",
+      "to": "backend/models/consumptionTransaction.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/tests/canteen.integration.test.ts",
+      "to": "backend/models/dailyConsumption.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/tests/canteen.integration.test.ts",
+      "to": "backend/models/payment.model.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/tests/health.test.ts",
+      "to": "backend/app.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/tests/regressions.test.ts",
+      "to": "backend/app.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/tests/regressions.test.ts",
+      "to": "backend/models/bill.model.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "backend/tests/regressions.test.ts",
+      "to": "backend/models/boss.model.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "backend/tests/regressions.test.ts",
+      "to": "backend/models/consumptionTransaction.model.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/tests/regressions.test.ts",
+      "to": "backend/models/dailyConsumption.model.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "backend/tests/regressions.test.ts",
+      "to": "backend/models/khata.model.ts",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "backend/tests/regressions.test.ts",
+      "to": "backend/models/payment.model.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "backend/tests/regressions.test.ts",
+      "to": "backend/services/period.service.ts",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "backend/tests/regressions.test.ts",
+      "to": "backend/utils/transaction.ts",
+      "kind": "dynamic-import",
+      "line": 74
+    },
+    {
+      "from": "backend/utils/date.ts",
+      "to": "backend/config/env.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "backend/validators/bill.validator.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/validators/consumption.validator.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/validators/expense.validator.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/validators/item.validator.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/validators/khata.validator.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/validators/office.validator.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/validators/payment.validator.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/validators/report.validator.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "backend/validators/staff.validator.ts",
+      "to": "backend/validators/common.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/Pagination.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/hooks/useDebounce.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/lib/services/insightService.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/audit-logs/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/lib/services/insightService.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/lib/services/operationService.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 21
+    },
+    {
+      "from": "frontend/app/(admin)/bills/[id]/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/Pagination.tsx",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/lib/services/khataService.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/lib/services/operationService.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 21
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 23
+    },
+    {
+      "from": "frontend/app/(admin)/bills/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 22
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/components/ui/StatCard.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/lib/services/insightService.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/dashboard/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/Pagination.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/lib/services/expenseService.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "frontend/app/(admin)/expenses/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/Pagination.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/hooks/useDebounce.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/lib/services/operationService.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "frontend/app/(admin)/items/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/hooks/useDebounce.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/lib/services/insightService.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/lib/services/khataService.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/lib/services/operationService.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 21
+    },
+    {
+      "from": "frontend/app/(admin)/khaja/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/ConfirmDialog.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/StatCard.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/lib/services/khataService.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 22
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/[id]/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 21
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/lib/services/khataService.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/new/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/components/ui/Pagination.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/hooks/useDebounce.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/lib/services/khataService.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/khatas/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/layout.tsx",
+      "to": "frontend/components/layout/AdminShell.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/app/(admin)/layout.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/layout.tsx",
+      "to": "frontend/providers/AuthProvider.tsx",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/StatCard.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/lib/services/khataService.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 21
+    },
+    {
+      "from": "frontend/app/(admin)/offices/[id]/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/components/ui/Pagination.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/hooks/useDebounce.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/lib/services/khataService.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/offices/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/Pagination.tsx",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/lib/services/khataService.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/lib/services/operationService.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 21
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 23
+    },
+    {
+      "from": "frontend/app/(admin)/payments/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 22
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/components/ui/StatCard.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/lib/services/insightService.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/reports/page.tsx",
+      "to": "frontend/utils/money.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/lib/services/insightService.ts",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/providers/AuthProvider.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/settings/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/Badge.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/Card.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/EmptyState.tsx",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 14
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/PageHeader.tsx",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 13
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/components/ui/Table.tsx",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/hooks/useAsync.ts",
+      "kind": "import",
+      "line": 16
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/hooks/useDebounce.ts",
+      "kind": "import",
+      "line": 17
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 19
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/lib/services/khataService.ts",
+      "kind": "import",
+      "line": 18
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 15
+    },
+    {
+      "from": "frontend/app/(admin)/staff/page.tsx",
+      "to": "frontend/utils/date.ts",
+      "kind": "import",
+      "line": 20
+    },
+    {
+      "from": "frontend/app/(auth)/login/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(auth)/login/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(auth)/login/page.tsx",
+      "to": "frontend/components/ui/Spinner.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(auth)/login/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 12
+    },
+    {
+      "from": "frontend/app/(auth)/login/page.tsx",
+      "to": "frontend/lib/services/authService.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(auth)/login/page.tsx",
+      "to": "frontend/providers/AuthProvider.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/(auth)/login/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(auth)/setup/page.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/app/(auth)/setup/page.tsx",
+      "to": "frontend/components/ui/Input.tsx",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/app/(auth)/setup/page.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 11
+    },
+    {
+      "from": "frontend/app/(auth)/setup/page.tsx",
+      "to": "frontend/lib/services/authService.ts",
+      "kind": "import",
+      "line": 10
+    },
+    {
+      "from": "frontend/app/(auth)/setup/page.tsx",
+      "to": "frontend/providers/AuthProvider.tsx",
+      "kind": "import",
+      "line": 8
+    },
+    {
+      "from": "frontend/app/(auth)/setup/page.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 9
+    },
+    {
+      "from": "frontend/app/layout.tsx",
+      "to": "frontend/app/globals.css",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "frontend/app/layout.tsx",
+      "to": "frontend/providers/Providers.tsx",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/components/layout/AdminShell.tsx",
+      "to": "frontend/providers/AuthProvider.tsx",
+      "kind": "import",
+      "line": 24
+    },
+    {
+      "from": "frontend/components/layout/AdminShell.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 23
+    },
+    {
+      "from": "frontend/components/ui/Badge.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/components/ui/Button.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/components/ui/Card.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/components/ui/ConfirmDialog.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/components/ui/ConfirmDialog.tsx",
+      "to": "frontend/components/ui/Modal.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/components/ui/Input.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "frontend/components/ui/PageHeader.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/components/ui/Pagination.tsx",
+      "to": "frontend/components/ui/Button.tsx",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/components/ui/Pagination.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/components/ui/Spinner.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/components/ui/StatCard.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/components/ui/Table.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/hooks/useAsync.ts",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/lib/services/authService.ts",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/lib/services/authService.ts",
+      "to": "frontend/lib/services/base.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "frontend/lib/services/authService.ts",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/lib/services/base.ts",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/lib/services/base.ts",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "frontend/lib/services/expenseService.ts",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/lib/services/expenseService.ts",
+      "to": "frontend/lib/services/base.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "frontend/lib/services/expenseService.ts",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/lib/services/insightService.ts",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/lib/services/insightService.ts",
+      "to": "frontend/lib/services/base.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "frontend/lib/services/insightService.ts",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/lib/services/khataService.ts",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/lib/services/khataService.ts",
+      "to": "frontend/lib/services/base.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "frontend/lib/services/khataService.ts",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/lib/services/operationService.ts",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 1
+    },
+    {
+      "from": "frontend/lib/services/operationService.ts",
+      "to": "frontend/lib/services/base.ts",
+      "kind": "import",
+      "line": 2
+    },
+    {
+      "from": "frontend/lib/services/operationService.ts",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/providers/AuthProvider.tsx",
+      "to": "frontend/lib/apiClient.ts",
+      "kind": "import",
+      "line": 6
+    },
+    {
+      "from": "frontend/providers/AuthProvider.tsx",
+      "to": "frontend/lib/services/authService.ts",
+      "kind": "import",
+      "line": 5
+    },
+    {
+      "from": "frontend/providers/AuthProvider.tsx",
+      "to": "frontend/types/api.ts",
+      "kind": "import",
+      "line": 7
+    },
+    {
+      "from": "frontend/providers/Providers.tsx",
+      "to": "frontend/providers/AuthProvider.tsx",
+      "kind": "import",
+      "line": 3
+    },
+    {
+      "from": "frontend/providers/Providers.tsx",
+      "to": "frontend/providers/ToastProvider.tsx",
+      "kind": "import",
+      "line": 4
+    },
+    {
+      "from": "frontend/providers/ToastProvider.tsx",
+      "to": "frontend/utils/cn.ts",
+      "kind": "import",
+      "line": 4
+    }
+  ],
+  "unresolvedLocalImports": [
+    {
+      "from": "backend/src/services/period.service.ts",
+      "specifier": "../utils/date",
+      "line": 2
+    }
+  ]
+}
