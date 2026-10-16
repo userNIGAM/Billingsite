@@ -15,10 +15,12 @@ function required(name: string): string {
   return value;
 }
 
-// The deployed UI (Vercel) in production, the Next.js dev server otherwise.
+// The deployed UI (Vercel) when live — production or on Render, which sets
+// RENDER=true — and the Next.js dev server otherwise.
+const isLive = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 const frontendUrl = (
   process.env.FRONTEND_URL ||
-  (process.env.NODE_ENV === 'production' ? 'https://billingsite-bay.vercel.app' : 'http://localhost:3000')
+  (isLive ? 'https://billingsite-bay.vercel.app' : 'http://localhost:3000')
 ).replace(/\/+$/, '');
 
 export const env = {
