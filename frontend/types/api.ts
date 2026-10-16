@@ -224,6 +224,7 @@ export interface CanteenProfile {
   name: string;
   address: string;
   phone: string;
+  panNumber: string;
   billingNote: string;
 }
 

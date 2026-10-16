@@ -25,7 +25,7 @@ export default function SettingsPage() {
       <PageHeader title="Settings" description="Canteen identity used on bills, and your session." />
 
       <Card>
-        <CardHeader title="Canteen profile" subtitle="Shown in the bill header." />
+        <CardHeader title="Canteen profile" subtitle="These details are saved to the database and shown on bills." />
         {profile.loading ? (
           <LoadingState />
         ) : profile.error || !profile.data ? (
@@ -60,13 +60,15 @@ function ProfileForm({ initial, onSaved }: { initial: CanteenProfile; onSaved: (
   const [name, setName] = useState(initial.name);
   const [address, setAddress] = useState(initial.address);
   const [phone, setPhone] = useState(initial.phone);
+  const [panNumber, setPanNumber] = useState(initial.panNumber ?? '');
   const [billingNote, setBillingNote] = useState(initial.billingNote);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const profileIncomplete = !initial.name.trim() || !initial.address.trim() || !initial.phone.trim();
 
   async function save() {
-    if (!name.trim()) {
-      setError('A canteen name is required.');
+    if (!name.trim() || !address.trim() || !phone.trim()) {
+      setError('Canteen name, address, and phone are required.');
       return;
     }
     setSaving(true);
@@ -76,6 +78,7 @@ function ProfileForm({ initial, onSaved }: { initial: CanteenProfile; onSaved: (
         name: name.trim(),
         address: address.trim(),
         phone: phone.trim(),
+        panNumber: panNumber.trim(),
         billingNote: billingNote.trim(),
       });
       toast.success('Settings saved.');
@@ -89,10 +92,23 @@ function ProfileForm({ initial, onSaved }: { initial: CanteenProfile; onSaved: (
 
   return (
     <CardBody>
+      {profileIncomplete ? (
+        <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          Complete the canteen name, address, and phone number so they can be used on bills.
+        </div>
+      ) : null}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Input label="Canteen name" required value={name} onChange={(e) => setName(e.target.value)} className="sm:col-span-2" />
-        <Input label="Address" value={address} onChange={(e) => setAddress(e.target.value)} className="sm:col-span-2" />
-        <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <Input label="Address" required value={address} onChange={(e) => setAddress(e.target.value)} className="sm:col-span-2" />
+        <Input label="Phone" type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <Input
+          label="PAN number"
+          value={panNumber}
+          onChange={(e) => setPanNumber(e.target.value.replace(/\D/g, '').slice(0, 9))}
+          hint="Optional. Enter the 9-digit Nepal PAN registered to this business."
+          inputMode="numeric"
+          maxLength={9}
+        />
         <Input label="Billing note" value={billingNote} onChange={(e) => setBillingNote(e.target.value)} className="sm:col-span-2" />
       </div>
       {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}

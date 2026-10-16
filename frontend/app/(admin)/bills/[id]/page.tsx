@@ -87,34 +87,36 @@ export default function BillDetailPage() {
         />
       </div>
 
-      <Card>
-        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-100 px-5 py-4">
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">{profile.data?.name || 'Canteen'}</h2>
-            {profile.data?.address ? <p className="text-xs text-gray-500">{profile.data.address}</p> : null}
-            {profile.data?.phone ? <p className="text-xs text-gray-500">Phone: {profile.data.phone}</p> : null}
+      <Card className="mx-auto w-full max-w-4xl overflow-hidden print:max-w-none print:rounded-none print:border-0">
+        <div className="border-b-2 border-gray-900 px-5 py-6 sm:px-8">
+          <div className="flex flex-wrap items-start justify-between gap-5">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">PAN Bill</p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-gray-950">{profile.data?.name || 'Canteen'}</h2>
+              {profile.data?.address ? <p className="mt-1 text-sm text-gray-600">{profile.data.address}</p> : null}
+              {profile.data?.phone ? <p className="mt-1 text-sm text-gray-600">Phone: {profile.data.phone}</p> : null}
+              {profile.data?.panNumber ? <p className="mt-1 text-sm font-semibold text-gray-800">PAN: {profile.data.panNumber}</p> : null}
+            </div>
+            <div className="min-w-48 rounded-md bg-gray-50 px-4 py-3 text-right print:bg-transparent print:p-0">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Bill number</p>
+              <p className="mt-1 font-mono text-lg font-bold text-gray-950">{b.billNumber}</p>
+              <p className="mt-2 text-xs text-gray-500">Bill date</p>
+              <p className="text-sm font-medium text-gray-900">{formatDate(b.generatedAt)}</p>
+              <div className="mt-2">
+                {b.isVoided ? <Badge tone="red">VOIDED</Badge> : <Badge tone={b.status === 'PAID' ? 'green' : b.status === 'PARTIALLY_PAID' ? 'amber' : 'blue'}>{b.status}</Badge>}
+              </div>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="font-mono text-sm font-semibold text-gray-900">{b.billNumber}</p>
-            <p className="text-xs text-gray-500">Generated {formatDateTime(b.generatedAt)}</p>
-            {b.isVoided ? <Badge tone="red">VOIDED</Badge> : <Badge tone={b.status === 'PAID' ? 'green' : b.status === 'PARTIALLY_PAID' ? 'amber' : 'blue'}>{b.status}</Badge>}
+          <div className="mt-5 border-t border-dashed border-gray-300 pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Billed to</p>
+            <p className="mt-1 text-base font-semibold text-gray-950">{b.payerNameSnapshot}</p>
+            <p className="text-xs text-gray-600">{b.scope === 'INDIVIDUAL' ? 'Individual' : b.scope === 'BOSS_GROUP' ? 'Office billing group' : 'Office'}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 px-5 py-4 sm:grid-cols-3">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500">Billed to</p>
-            <p className="mt-1 text-sm font-medium text-gray-900">{b.payerNameSnapshot}</p>
-            <p className="text-xs text-gray-500">{b.scope === 'INDIVIDUAL' ? 'Individual' : b.scope === 'BOSS_GROUP' ? 'Boss group' : 'Office'}</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500">Period</p>
-            <p className="mt-1 text-sm text-gray-900">{formatDate(b.periodStart)} – {formatDate(b.periodEnd)}</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500">Due date</p>
-            <p className="mt-1 text-sm text-gray-900">{formatDate(b.periodEnd)}</p>
-          </div>
+        <div className="flex flex-wrap justify-between gap-3 border-b border-gray-200 bg-gray-50 px-5 py-3 text-sm sm:px-8 print:bg-white">
+          <p><span className="text-gray-500">Billing period:</span> <span className="font-medium text-gray-900">{formatDate(b.periodStart)} – {formatDate(b.periodEnd)}</span></p>
+          <p><span className="text-gray-500">Due date:</span> <span className="font-medium text-gray-900">{formatDate(b.periodEnd)}</span></p>
         </div>
 
         {b.lineItems.length === 0 ? (
@@ -123,16 +125,18 @@ export default function BillDetailPage() {
           <Table>
             <THead>
               <Tr>
+                <Th>S.N.</Th>
                 <Th>Date</Th>
-                <Th>Item</Th>
+                <Th>Particulars</Th>
                 <Th align="right">Qty</Th>
-                <Th align="right">Unit</Th>
-                <Th align="right">Amount</Th>
+                <Th align="right">Rate (NPR)</Th>
+                <Th align="right">Amount (NPR)</Th>
               </Tr>
             </THead>
             <TBody>
               {b.lineItems.map((line, idx) => (
                 <Tr key={`${line.itemId}-${idx}`}>
+                  <Td>{idx + 1}</Td>
                   <Td>{formatDate(line.businessDate)}</Td>
                   <Td>{line.itemNameSnapshot}</Td>
                   <Td align="right">{line.quantity}</Td>
@@ -144,20 +148,20 @@ export default function BillDetailPage() {
           </Table>
         )}
 
-        <CardBody className="border-t border-gray-100">
-          <dl className="ml-auto grid max-w-xs grid-cols-2 gap-y-1.5 text-sm">
-            <dt className="text-gray-500">Consumption</dt>
+        <CardBody className="border-t border-gray-200 sm:px-8">
+          <dl className="ml-auto grid max-w-sm grid-cols-2 gap-x-8 gap-y-2 text-sm">
+            <dt className="text-gray-600">Current period total</dt>
             <dd className="text-right tabular-nums">{formatNPR(b.consumptionTotalPaisa)}</dd>
-            <dt className="text-gray-500">Previous due</dt>
+            <dt className="text-gray-600">Previous balance</dt>
             <dd className="text-right tabular-nums">{formatNPR(b.previousDuePaisa)}</dd>
-            <dt className="text-gray-500">Credit applied</dt>
+            <dt className="text-gray-600">Advance/credit applied</dt>
             <dd className="text-right tabular-nums">− {formatNPR(b.creditAppliedPaisa)}</dd>
-            <dt className="border-t border-gray-200 pt-1.5 font-medium text-gray-900">Total payable</dt>
-            <dd className="border-t border-gray-200 pt-1.5 text-right font-medium tabular-nums text-gray-900">{formatNPR(b.totalPayablePaisa)}</dd>
-            <dt className="text-gray-500">Paid</dt>
+            <dt className="border-t border-gray-300 pt-2 font-semibold text-gray-950">Total payable</dt>
+            <dd className="border-t border-gray-300 pt-2 text-right font-semibold tabular-nums text-gray-950">{formatNPR(b.totalPayablePaisa)}</dd>
+            <dt className="text-gray-600">Amount received</dt>
             <dd className="text-right tabular-nums">{formatNPR(b.paidPaisa)}</dd>
-            <dt className="font-semibold text-gray-900">Balance due</dt>
-            <dd className="text-right font-semibold tabular-nums text-brand-700">{formatNPR(b.duePaisa)}</dd>
+            <dt className="border-t-2 border-gray-900 pt-2 text-base font-bold text-gray-950">Balance due</dt>
+            <dd className="border-t-2 border-gray-900 pt-2 text-right text-base font-bold tabular-nums text-gray-950">{formatNPR(b.duePaisa)}</dd>
           </dl>
         </CardBody>
 
@@ -167,10 +171,13 @@ export default function BillDetailPage() {
           </CardBody>
         ) : null}
         {profile.data?.billingNote ? (
-          <CardBody className="border-t border-gray-100 text-center text-xs text-gray-500">
+          <CardBody className="border-t border-gray-100 text-center text-xs text-gray-600 sm:px-8">
             {profile.data.billingNote}
           </CardBody>
         ) : null}
+        <div className="border-t border-gray-200 px-5 py-4 text-center text-xs text-gray-500 sm:px-8">
+          Thank you for your business.
+        </div>
       </Card>
 
       <Modal
