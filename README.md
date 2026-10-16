@@ -102,14 +102,17 @@ npm install
 | `JWT_SECRET` | Long random string — **never commit this** |
 | `JWT_EXPIRES_IN` | e.g. `7d` |
 | `ADMIN_SETUP_TOKEN` | One-time token to create the first admin |
-| `CORS_ORIGIN` | Comma-separated allowed frontend origin(s) |
+| `FRONTEND_URL` | Frontend URL, always CORS-allowed (default `http://localhost:3000`; `https://billingsite-bay.vercel.app` when `NODE_ENV=production`) |
+| `CORS_ORIGIN` | Optional extra comma-separated allowed origin(s) |
 | `COOKIE_NAME` | Name of the auth cookie (default `canteen_token`) |
 
-### `frontend/.env`
+### `frontend/.env.local`
 
 | Variable | Description |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | Base URL of the backend API, e.g. `http://localhost:5000/api` |
+| `BACKEND_URL` | Backend origin `/api/*` is proxied to (default `http://localhost:5000`; `https://billingsite.onrender.com` in production builds) |
+| `COOKIE_NAME` | Must match the backend's `COOKIE_NAME` |
+| `NEXT_PUBLIC_API_URL` | Optional: call the API directly instead of via the `/api` proxy. Leave unset in production. |
 
 **Never commit `.env`, JWT secrets, or MongoDB credentials.** Both `.env` files are gitignored; only `.env.example` is tracked.
 
@@ -128,11 +131,11 @@ For local development, add your current public IP under Atlas **Security →
 Network Access**. Atlas blocks connections from IPs that are not on this list;
 do not use `0.0.0.0/0` as a workaround.
 
-The backend and frontend default to `http://localhost:5000` for the API.
-If you change the backend port, set `NEXT_PUBLIC_API_URL` in
-`frontend/.env.local` to `http://localhost:<port>/api` and include the
-frontend's exact origin (usually `http://localhost:3000`) in backend
-`CORS_ORIGIN`. Restart the frontend after changing its environment file.
+The browser calls `/api` on the frontend, which Next.js proxies to
+`http://localhost:5000`. If you change the backend port, set `BACKEND_URL` in
+`frontend/.env.local` to `http://localhost:<port>`, and set `FRONTEND_URL` in
+`backend/.env` if the frontend is not on `http://localhost:3000`. Restart the
+frontend after changing its environment file.
 
 ## 7. First-Run Setup
 
@@ -325,9 +328,10 @@ Next.js frontend  →  Express/Node backend  →  MongoDB Atlas
   is first-party and visible to the route guard in `frontend/proxy.ts`.
 - Backend (Render, root `backend`): build `npm install --include=dev && npm run build`,
   start `npm start`; env `NODE_ENV=production`, `MONGODB_URI`, `JWT_SECRET`,
-  `ADMIN_SETUP_TOKEN`, `CORS_ORIGIN=https://billingsite-bay.vercel.app`.
-- Frontend (Vercel, root `frontend`): env `BACKEND_URL=https://billingsite.onrender.com`.
-  Leave `NEXT_PUBLIC_API_URL` unset, or the cookie becomes third-party.
+  `ADMIN_SETUP_TOKEN`, `FRONTEND_URL=https://billingsite-bay.vercel.app`.
+- Frontend (Vercel, root `frontend`): env `BACKEND_URL=https://billingsite.onrender.com`,
+  and `COOKIE_NAME` if the backend sets one. Leave `NEXT_PUBLIC_API_URL`
+  unset, or the cookie becomes third-party.
 - Take regular MongoDB backups (Atlas has automated backups on paid tiers;
   for self-hosted Mongo use `mongodump` on a schedule).
 

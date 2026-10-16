@@ -15,6 +15,12 @@ function required(name: string): string {
   return value;
 }
 
+// The deployed UI (Vercel) in production, the Next.js dev server otherwise.
+const frontendUrl = (
+  process.env.FRONTEND_URL ||
+  (process.env.NODE_ENV === 'production' ? 'https://billingsite-bay.vercel.app' : 'http://localhost:3000')
+).replace(/\/+$/, '');
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   isProduction: process.env.NODE_ENV === 'production',
@@ -30,8 +36,10 @@ export const env = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   adminSetupToken: process.env.ADMIN_SETUP_TOKEN ?? '',
 
-  corsOrigins: (process.env.CORS_ORIGIN ?? 'http://localhost:3000')
-    .split(',')
+  frontendUrl,
+
+  // FRONTEND_URL is always allowed; CORS_ORIGIN adds extra origins.
+  corsOrigins: [frontendUrl, ...(process.env.CORS_ORIGIN ?? '').split(',')]
     .map((origin) => origin.trim())
     .filter(Boolean),
 
