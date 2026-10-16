@@ -5,6 +5,7 @@ const canteenProfileSchema = new Schema(
     name: { type: String, default: '', trim: true, maxlength: 120 },
     address: { type: String, default: '', trim: true, maxlength: 200 },
     phone: { type: String, default: '', trim: true, maxlength: 40 },
+    panNumber: { type: String, default: '', trim: true, maxlength: 9 },
     billingNote: { type: String, default: '', trim: true, maxlength: 300 },
   },
   { timestamps: true }

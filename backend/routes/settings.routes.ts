@@ -7,6 +7,7 @@ const updateProfileSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   address: z.string().trim().max(200).optional(),
   phone: z.string().trim().max(40).optional(),
+  panNumber: z.union([z.literal(''), z.string().trim().regex(/^\d{9}$/, 'PAN number must contain 9 digits.')]).optional(),
   billingNote: z.string().trim().max(300).optional(),
 });
 

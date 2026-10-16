@@ -11,6 +11,7 @@ export async function getCanteenProfile() {
       name: profile.name,
       address: profile.address,
       phone: profile.phone,
+      panNumber: profile.panNumber ?? '',
       billingNote: profile.billingNote,
     };
   }
@@ -21,11 +22,12 @@ export const CanteenProfile_DEFAULTS = {
   name: '',
   address: '',
   phone: '',
+  panNumber: '',
   billingNote: '',
 };
 
 export async function updateCanteenProfile(
-  input: { name?: string; address?: string; phone?: string; billingNote?: string }
+  input: { name?: string; address?: string; phone?: string; panNumber?: string; billingNote?: string }
 ) {
   // Mongo rejects an update where the same path appears in both $set and
   // $setOnInsert (ConflictingUpdateOperators, code 40), so the defaults must
@@ -49,6 +51,7 @@ export async function updateCanteenProfile(
     name: doc.name,
     address: doc.address,
     phone: doc.phone,
+    panNumber: doc.panNumber ?? '',
     billingNote: doc.billingNote,
   };
 }

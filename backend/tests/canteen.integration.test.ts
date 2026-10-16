@@ -525,6 +525,7 @@ describe('Canteen Khata API — end to end', () => {
       name: expect.any(String),
       address: expect.any(String),
       phone: expect.any(String),
+      panNumber: expect.any(String),
       billingNote: expect.any(String),
     }));
     expect(read.body.data.profile.name).toBe('');
@@ -533,11 +534,25 @@ describe('Canteen Khata API — end to end', () => {
       name: 'Khaja Ghar',
       address: 'Bharatpur',
       phone: '9800000000',
+      panNumber: '123456789',
       billingNote: 'Please bring exact change.',
     });
     expect(update.status).toBe(200);
     expect(update.body.data.profile.name).toBe('Khaja Ghar');
+    expect(update.body.data.profile.panNumber).toBe('123456789');
     expect(update.body.data.profile.billingNote).toBe('Please bring exact change.');
+
+    const invalidPan = await agent.patch('/api/settings/profile').send({ panNumber: '12345' });
+    expect(invalidPan.status).toBe(422);
+
+    const persisted = await agent.get('/api/settings/profile');
+    expect(persisted.body.data.profile).toEqual({
+      name: 'Khaja Ghar',
+      address: 'Bharatpur',
+      phone: '9800000000',
+      panNumber: '123456789',
+      billingNote: 'Please bring exact change.',
+    });
   });
 
   it('audit logs record financially meaningful actions', async () => {

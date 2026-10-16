@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { env } from '../config/env';
+import { isOriginAllowed } from '../config/origins';
 import { ApiError } from '../utils/ApiError';
 
 /**
@@ -26,37 +26,16 @@ export function csrfProtection(req: Request, _res: Response, next: NextFunction)
     return;
   }
 
-  const source = (origin ?? referer ?? '').toString();
-  const sourceOrigin = parseOrigin(source);
-
-  // EXACT equality against the parsed origin. A `startsWith` check accepts
-  // any host that merely begins with an allowed origin, so
-  // `https://app.example.com.evil.io` passed when
-  // CORS_ORIGIN=https://app.example.com — and since the production cookie is
-  // SameSite=None, such a request carries the auth cookie and can drive every
-  // authenticated mutation. Parse the Origin/Referer to its scheme+host+port
-  // and compare that instead of the raw header.
-  const isAllowed = env.corsOrigins.some((allowedOrigin) => {
-    const allowed = parseOrigin(allowedOrigin);
-    return allowed !== null && allowed === sourceOrigin;
-  });
-
-  if (!isAllowed) {
+  // Compare the request's origin exactly (isOriginAllowed normalizes to
+  // scheme://host[:port]) against the same allowlist the CORS layer uses. A
+  // prefix match would also accept attacker hosts such as
+  // `https://app.example.com.evil.io`; since the production cookie is
+  // SameSite=None those requests carry the auth cookie and could drive every
+  // authenticated mutation. The Referer is a full URL, so normalization drops
+  // its path.
+  if (!isOriginAllowed(origin ?? referer ?? '')) {
     next(ApiError.forbidden('Cross-site request blocked.', 'CSRF_BLOCKED'));
     return;
   }
   next();
-}
-
-/**
- * Reduces a URL to `scheme://host[:port]` so comparison ignores paths,
- * query strings and trailing slashes. Returns null for anything unparseable.
- */
-function parseOrigin(value: string): string | null {
-  try {
-    const url = new URL(value);
-    return `${url.protocol}//${url.host}`;
-  } catch {
-    return null;
-  }
 }

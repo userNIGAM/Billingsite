@@ -18,6 +18,9 @@ function required(name: string): string {
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   isProduction: process.env.NODE_ENV === 'production',
+  // Rate limiters are skipped under test so suites that fire many requests
+  // aren't throttled; the guards themselves are exercised in production.
+  isTest: process.env.NODE_ENV === 'test',
   port: Number(process.env.PORT ?? 5000),
   timezone: process.env.TZ ?? 'Asia/Kathmandu',
 

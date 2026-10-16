@@ -5,34 +5,10 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import mongoSanitize from 'express-mongo-sanitize';
 import { env } from './config/env';
+import { isOriginAllowed } from './config/origins';
 import routes from './routes';
+import { apiLimiter, writeLimiter } from './middleware/rateLimit';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
-
-function isPrivateNetworkHost(hostname: string): boolean {
-  if (!hostname) return false;
-
-  const normalized = hostname.toLowerCase();
-  if (normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '::1' || normalized.endsWith('.localhost')) {
-    return true;
-  }
-
-  if (normalized.startsWith('10.') || normalized.startsWith('192.168.') || normalized.startsWith('172.')) {
-    const parts = normalized.split('.');
-    if (parts.length === 4) {
-      const second = Number(parts[1]);
-      if (normalized.startsWith('172.')) {
-        return second >= 16 && second <= 31;
-      }
-      return true;
-    }
-  }
-
-  if (normalized.startsWith('::ffff:')) {
-    return isPrivateNetworkHost(normalized.replace('::ffff:', ''));
-  }
-
-  return false;
-}
 
 export function createApp(): Express {
   const app = express();
@@ -44,7 +20,23 @@ export function createApp(): Express {
   }
 
   // ---- Security headers ----
-  app.use(helmet());
+  // This service only ever returns JSON, so the Content-Security-Policy can be
+  // locked to 'none' — there is no HTML, script or style to permit. The UI's
+  // own (much richer) CSP is set by the Next.js app. `helmet()` supplies the
+  // remaining defaults (HSTS, X-Content-Type-Options, etc.).
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: false,
+        directives: {
+          'default-src': ["'none'"],
+          'frame-ancestors': ["'none'"],
+          'base-uri': ["'none'"],
+          'form-action': ["'none'"],
+        },
+      },
+    })
+  );
 
   // ---- CORS ----
   // credentials: true is required because the frontend sends the auth
@@ -54,26 +46,13 @@ export function createApp(): Express {
   app.use(
     cors({
       origin: (origin, callback) => {
-        if (!origin) {
+        // No Origin (curl, same-origin, server-to-server) is allowed through;
+        // browsers always send one on credentialed cross-origin requests, so
+        // this does not open a CSRF hole (the CSRF guard covers that).
+        if (!origin || isOriginAllowed(origin)) {
           callback(null, true);
           return;
         }
-
-        if (env.corsOrigins.includes(origin)) {
-          callback(null, true);
-          return;
-        }
-
-        try {
-          const { hostname } = new URL(origin);
-          if (isPrivateNetworkHost(hostname)) {
-            callback(null, true);
-            return;
-          }
-        } catch {
-          // fall through to reject below
-        }
-
         callback(new Error(`Origin ${origin} is not allowed by CORS`));
       },
       credentials: true,
@@ -92,7 +71,9 @@ export function createApp(): Express {
   app.use(morgan(env.isProduction ? 'combined' : 'dev'));
 
   // ---- Routes ----
-  app.use('/api', routes);
+  // apiLimiter caps all API traffic per IP; writeLimiter adds a tighter cap on
+  // mutations. Both skip themselves under NODE_ENV=test.
+  app.use('/api', apiLimiter, writeLimiter, routes);
 
   // ---- 404 + error handling (must be last) ----
   app.use(notFoundHandler);
