@@ -112,8 +112,6 @@ npm install
 |---|---|
 | `BACKEND_URL` | Backend origin `/api/*` is proxied to (default `http://localhost:5000`; `https://billingsite.onrender.com` in production builds) |
 | `COOKIE_NAME` | Must match the backend's `COOKIE_NAME` |
-| `NEXT_PUBLIC_API_URL` | Optional: call the API directly instead of via the `/api` proxy. Leave unset in production. |
-
 **Never commit `.env`, JWT secrets, or MongoDB credentials.** Both `.env` files are gitignored; only `.env.example` is tracked.
 
 ## 6. MongoDB Setup
@@ -330,8 +328,8 @@ Next.js frontend  →  Express/Node backend  →  MongoDB Atlas
   start `npm start`; env `NODE_ENV=production`, `MONGODB_URI`, `JWT_SECRET`,
   `ADMIN_SETUP_TOKEN`, `FRONTEND_URL=https://billingsite-bay.vercel.app`.
 - Frontend (Vercel, root `frontend`): env `BACKEND_URL=https://billingsite.onrender.com`,
-  and `COOKIE_NAME` if the backend sets one. Leave `NEXT_PUBLIC_API_URL`
-  unset, or the cookie becomes third-party.
+  and `COOKIE_NAME` if the backend sets one. `NEXT_PUBLIC_API_URL` is no
+  longer used; the browser always calls the same-origin `/api`.
 - Take regular MongoDB backups (Atlas has automated backups on paid tiers;
   for self-hosted Mongo use `mongodump` on a schedule).
 

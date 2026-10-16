@@ -1,16 +1,6 @@
 /** @type {import('next').NextConfig} */
 const isProd = process.env.NODE_ENV === 'production';
 
-// Origin of the backend API for the CSP connect-src allowlist. Empty when the
-// API is reached through the same-origin `/api` rewrite ('self' covers it).
-function apiOrigin() {
-  try {
-    return process.env.NEXT_PUBLIC_API_URL ? new URL(process.env.NEXT_PUBLIC_API_URL).origin : '';
-  } catch {
-    return '';
-  }
-}
-
 // Backend origin that same-origin `/api/*` requests are proxied to (see
 // lib/apiClient.ts). Read at build time; defaults to the production API.
 const backendUrl = (
@@ -27,7 +17,8 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' blob: data:",
   "font-src 'self' data:",
-  `connect-src 'self' ${apiOrigin()}`.trim(),
+  // The API is reached through the same-origin `/api` rewrite.
+  "connect-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

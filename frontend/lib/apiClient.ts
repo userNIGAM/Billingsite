@@ -11,11 +11,12 @@
  * for paginated lists.
  */
 
-// Defaults to the same-origin `/api`, which next.config.mjs rewrites to the
-// backend (BACKEND_URL). Keeping the API same-origin makes the HttpOnly auth
-// cookie first-party, so the route guard in proxy.ts can see it and browsers
-// that block third-party cookies still keep the session.
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/+$/, '');
+// Always the same-origin `/api`, which next.config.mjs rewrites to the backend
+// (BACKEND_URL). Keeping the API same-origin makes the HttpOnly auth cookie
+// first-party, so the route guard in proxy.ts can see it and browsers that
+// block third-party cookies still keep the session. Deliberately not
+// configurable: a build-time URL such as localhost:5000 would ship to users.
+const API_URL = '/api';
 
 export class ApiError extends Error {
   code: string;
