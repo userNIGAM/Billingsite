@@ -318,11 +318,16 @@ Next.js frontend  →  Express/Node backend  →  MongoDB Atlas
 - Deploy the backend and frontend as two separate services (e.g. Render/
   Railway/Fly.io for the API, Vercel for Next.js) or both on one VM behind a
   reverse proxy.
-- Set `CORS_ORIGIN` on the backend to the deployed frontend URL.
-- Set `NEXT_PUBLIC_API_URL` on the frontend to the deployed backend URL.
-- Cookies require `NODE_ENV=production` (sets `Secure`) and the frontend and
-  backend should be served over HTTPS for the auth cookie to work correctly
-  across origins.
+- Live: frontend https://billingsite-bay.vercel.app, API
+  https://billingsite.onrender.com.
+- The browser only talks to the frontend: Next.js rewrites `/api/*` to
+  `BACKEND_URL` (see `frontend/next.config.mjs`), so the HttpOnly auth cookie
+  is first-party and visible to the route guard in `frontend/proxy.ts`.
+- Backend (Render, root `backend`): build `npm install --include=dev && npm run build`,
+  start `npm start`; env `NODE_ENV=production`, `MONGODB_URI`, `JWT_SECRET`,
+  `ADMIN_SETUP_TOKEN`, `CORS_ORIGIN=https://billingsite-bay.vercel.app`.
+- Frontend (Vercel, root `frontend`): env `BACKEND_URL=https://billingsite.onrender.com`.
+  Leave `NEXT_PUBLIC_API_URL` unset, or the cookie becomes third-party.
 - Take regular MongoDB backups (Atlas has automated backups on paid tiers;
   for self-hosted Mongo use `mongodump` on a schedule).
 

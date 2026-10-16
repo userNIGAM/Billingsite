@@ -11,12 +11,11 @@
  * for paginated lists.
  */
 
-const DEFAULT_API_URL = typeof window !== 'undefined'
-  ? `${window.location.protocol}//${window.location.hostname}:5000/api`
-  : 'http://localhost:5000/api';
-
-const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_URL)
-  .replace(/\/+$/, '');
+// Defaults to the same-origin `/api`, which next.config.mjs rewrites to the
+// backend (BACKEND_URL). Keeping the API same-origin makes the HttpOnly auth
+// cookie first-party, so the route guard in proxy.ts can see it and browsers
+// that block third-party cookies still keep the session.
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/+$/, '');
 
 export class ApiError extends Error {
   code: string;
@@ -69,7 +68,9 @@ interface RequestOptions {
 type QueryValue = RequestOptions['query'];
 
 function buildUrl(path: string, query?: QueryValue): string {
-  const url = new URL(`${API_URL}${path}`);
+  // A relative API_URL (the default `/api`) is resolved against the page.
+  const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+  const url = new URL(`${API_URL}${path}`, base);
   if (query) {
     Object.entries(query).forEach(([key, value]) => {
       // undefined means "not supplied" — sending the literal string
