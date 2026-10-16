@@ -9,7 +9,13 @@ import type { NextRequest } from 'next/server';
  */
 const PUBLIC_PATHS = ['/login', '/setup'];
 
-const AUTH_COOKIE = process.env.COOKIE_NAME ?? 'canteen_token';
+// Same rule as backend/config/env.ts: an invalid cookie name falls back to the
+// default there, so it must here too.
+const configuredCookie = process.env.COOKIE_NAME?.trim();
+const AUTH_COOKIE =
+  configuredCookie && /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/.test(configuredCookie)
+    ? configuredCookie
+    : 'canteen_token';
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

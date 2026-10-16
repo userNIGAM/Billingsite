@@ -15,6 +15,16 @@ function required(name: string): string {
   return value;
 }
 
+// COOKIE_NAME must be an RFC 6265 token, or res.cookie() throws ("argument
+// name is invalid") and login/logout 500. An invalid value falls back to the
+// default; frontend/proxy.ts applies the same rule so both sides agree.
+function cookieName(): string {
+  const value = process.env.COOKIE_NAME?.trim();
+  if (value && /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/.test(value)) return value;
+  if (value) console.warn(`Ignoring invalid COOKIE_NAME "${value}"; using canteen_token.`);
+  return 'canteen_token';
+}
+
 // The deployed UI (Vercel) when live — production or on Render, which sets
 // RENDER=true — and the Next.js dev server otherwise.
 const isLive = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
@@ -45,5 +55,5 @@ export const env = {
     .map((origin) => origin.trim())
     .filter(Boolean),
 
-  cookieName: process.env.COOKIE_NAME ?? 'canteen_token',
+  cookieName: cookieName(),
 };
