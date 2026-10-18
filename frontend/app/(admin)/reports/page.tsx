@@ -14,6 +14,13 @@ import { useAsync } from '../../../hooks/useAsync';
 import { reportService, type ReportGroup } from '../../../lib/services/insightService';
 import { formatNPR } from '../../../utils/money';
 import { formatDate, startOfMonth, todayBusinessDate } from '../../../utils/date';
+import { servingSizeLabel } from '../../../types/api';
+
+function ServingTag({ size }: { size?: 'HALF' | 'FULL' | null }) {
+  return size === 'HALF' ? (
+    <span className="ml-2 text-xs text-gray-500">{servingSizeLabel(size)}</span>
+  ) : null;
+}
 
 type Tab = 'sales' | 'items' | 'collections' | 'profit' | 'expenses' | 'customers' | 'offices' | 'outstanding';
 
@@ -114,7 +121,10 @@ function SalesReportView({ from, to }: { from: string; to: string }) {
             <TBody>
               {report.data.groups.map((g, idx) => (
                 <Tr key={idx}>
-                  <Td>{g.date ? formatDate(g.date) : g.itemName ?? String(g._id ?? '—')}</Td>
+                  <Td>
+                    {g.date ? formatDate(g.date) : g.itemName ?? String(g._id ?? '—')}
+                    <ServingTag size={g.servingSize} />
+                  </Td>
                   <Td align="right">{g.quantity ?? '—'}</Td>
                   <Td align="right">{formatNPR(g.revenuePaisa)}</Td>
                 </Tr>
@@ -149,8 +159,11 @@ function ItemsReportView({ from, to }: { from: string; to: string }) {
           </THead>
           <TBody>
             {report.data.map((r) => (
-              <Tr key={r.itemName}>
-                <Td className="font-medium text-gray-900">{r.itemName}</Td>
+              <Tr key={`${r.itemName}-${r.servingSize}`}>
+                <Td className="font-medium text-gray-900">
+                  {r.itemName}
+                  <ServingTag size={r.servingSize} />
+                </Td>
                 <Td align="right">{r.quantity}</Td>
                 <Td align="right">{formatNPR(r.revenuePaisa)}</Td>
                 <Td align="right">{formatNPR(r.costPaisa)}</Td>

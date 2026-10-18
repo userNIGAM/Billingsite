@@ -75,8 +75,9 @@ async function topItems(from: string, to: string, limit = 5) {
     { $match: { businessDate: { $gte: from, $lte: to }, quantity: { $gt: 0 } } },
     {
       $group: {
-        _id: { itemId: '$itemId', itemName: '$itemNameSnapshot' },
+        _id: { itemId: '$itemId', itemName: '$itemNameSnapshot', servingSize: { $ifNull: ['$servingSize', 'FULL'] } },
         name: { $first: '$itemNameSnapshot' },
+        servingSize: { $first: { $ifNull: ['$servingSize', 'FULL'] } },
         quantity: { $sum: '$quantity' },
         revenue: { $sum: '$totalPaisa' },
         cost: { $sum: { $multiply: [{ $ifNull: ['$unitCostPaisa', 0] }, '$quantity'] } },
@@ -178,6 +179,7 @@ export async function dashboardSummary() {
     topItems: items.map((i) => ({
       itemId: String(i._id.itemId),
       name: i.name,
+      servingSize: (i.servingSize ?? 'FULL') as 'HALF' | 'FULL',
       quantity: i.quantity,
       revenuePaisa: i.revenue,
       costPaisa: i.cost,

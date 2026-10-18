@@ -1,6 +1,6 @@
 import { apiClient } from '../apiClient';
 import { paged, unwrap, type ListResult } from './base';
-import type { CanteenProfile, CustomerSearchResult, PageMeta } from '../../types/api';
+import type { CanteenProfile, CustomerSearchResult, PageMeta, ServingSize } from '../../types/api';
 
 export interface OutstandingRow {
   khataId: string;
@@ -34,7 +34,7 @@ export interface DashboardOverview {
     cashSurplusPaisa: number;
   };
   salesExpenseSeries: Array<{ date: string; salesPaisa: number; expensePaisa: number }>;
-  topItems: Array<{ itemId: string; name: string; quantity: number; revenuePaisa: number; costPaisa: number }>;
+  topItems: Array<{ itemId: string; name: string; servingSize: ServingSize; quantity: number; revenuePaisa: number; costPaisa: number }>;
 }
 
 export const dashboardService = {
@@ -90,6 +90,7 @@ export interface SalesReport {
   groups: Array<{
     date?: string;
     itemName?: string;
+    servingSize?: ServingSize;
     quantity?: number;
     revenuePaisa: number;
     _id?: unknown;
@@ -134,6 +135,7 @@ export interface CollectionsReport {
 
 export interface ItemReportRow {
   itemName: string;
+  servingSize: ServingSize;
   quantity: number;
   revenuePaisa: number;
   costPaisa: number;

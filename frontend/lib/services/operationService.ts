@@ -9,6 +9,8 @@ import type {
   Item,
   PayerRef,
   Payment,
+  ServingMode,
+  ServingSize,
 } from '../../types/api';
 
 // ---- Items ----
@@ -16,7 +18,9 @@ import type {
 export interface CreateItemInput {
   name: string;
   category: string;
+  servingMode?: ServingMode;
   sellingPricePaisa: number;
+  halfPlatePricePaisa?: number | null;
   costPricePaisa?: number | null;
   unit?: string;
   description?: string;
@@ -69,6 +73,7 @@ export interface RecordConsumptionInput {
   consumerType: ConsumerType;
   consumerId: string;
   itemId: string;
+  servingSize?: ServingSize;
   quantity: number;
   businessDate?: string;
   notes?: string;
@@ -82,6 +87,7 @@ export interface RecordConsumptionResult {
   consumerName: string;
   context: string;
   itemName: string;
+  servingSize: ServingSize;
   quantity: number;
   totalPaisa: number;
   businessDate: string;

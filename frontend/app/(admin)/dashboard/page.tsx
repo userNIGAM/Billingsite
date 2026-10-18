@@ -13,6 +13,7 @@ import { Plus, UtensilsCrossed } from 'lucide-react';
 import { useAsync } from '../../../hooks/useAsync';
 import { dashboardService } from '../../../lib/services/insightService';
 import { formatNPR } from '../../../utils/money';
+import { servingSizeLabel } from '../../../types/api';
 import { formatDate } from '../../../utils/date';
 
 export default function DashboardPage() {
@@ -163,8 +164,13 @@ export default function DashboardPage() {
               </THead>
               <TBody>
                 {d.topItems.map((item) => (
-                  <Tr key={item.itemId}>
-                    <Td>{item.name}</Td>
+                  <Tr key={`${item.itemId}:${item.servingSize}`}>
+                    <Td>
+                      {item.name}
+                      {item.servingSize === 'HALF' ? (
+                        <span className="ml-2 text-xs text-gray-500">{servingSizeLabel(item.servingSize)}</span>
+                      ) : null}
+                    </Td>
                     <Td align="right">{item.quantity}</Td>
                     <Td align="right">{formatNPR(item.revenuePaisa)}</Td>
                   </Tr>

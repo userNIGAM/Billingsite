@@ -14,13 +14,14 @@ import { useDebounced } from '../../../hooks/useDebounce';
 import { itemService, consumptionService } from '../../../lib/services/operationService';
 import { customerService } from '../../../lib/services/insightService';
 import { ApiError } from '../../../lib/apiClient';
-import type { CustomerSearchResult, Item } from '../../../types/api';
+import { servingSizeLabel, type CustomerSearchResult, type Item, type ServingSize } from '../../../types/api';
 import { formatNPR } from '../../../utils/money';
 import { formatDate, todayBusinessDate } from '../../../utils/date';
 
 interface CartLine {
   key: string;
   item: Item;
+  servingSize: ServingSize;
   quantity: number;
   consumer: CustomerSearchResult;
   businessDate: string;
@@ -28,7 +29,44 @@ interface CartLine {
 
 interface SelectedItem {
   item: Item;
+  servingSize: ServingSize;
   quantity: number;
+}
+
+function servingOptions(item: Item): ServingSize[] {
+  return item.servingMode === 'HALF_AND_FULL' ? ['HALF', 'FULL'] : ['FULL'];
+}
+
+function servingPrice(item: Item, size: ServingSize): number {
+  if (size === 'HALF') return item.halfPlatePricePaisa ?? item.sellingPricePaisa;
+  return item.sellingPricePaisa;
+}
+
+function lineKey(itemId: string, size: ServingSize): string {
+  return `${itemId}:${size}`;
+}
+
+/** Item picker cells — one button per available serving size. */
+function ItemChoices({ item, onAdd }: { item: Item; onAdd: (item: Item, size: ServingSize) => void }) {
+  const options = servingOptions(item);
+  return (
+    <>
+      {options.map((size) => (
+        <button
+          key={size}
+          type="button"
+          onClick={() => onAdd(item, size)}
+          className="flex min-h-20 flex-col items-start justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-left transition hover:border-brand-500 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-brand-200"
+        >
+          <span className="font-medium text-gray-900">{item.name}</span>
+          <span className="mt-1 text-xs text-gray-500">
+            {options.length > 1 ? `${servingSizeLabel(size)} · ` : ''}
+            {formatNPR(servingPrice(item, size))}
+          </span>
+        </button>
+      ))}
+    </>
+  );
 }
 
 export default function KhajaRecordPage() {
@@ -73,7 +111,10 @@ export default function KhajaRecordPage() {
   const matchingItems = availableItems.filter((item) =>
     item.name.toLocaleLowerCase().includes(itemQuery.trim().toLocaleLowerCase())
   );
-  const cartTotal = cart.reduce((sum, line) => sum + line.item.sellingPricePaisa * line.quantity, 0);
+  const cartTotal = cart.reduce(
+    (sum, line) => sum + servingPrice(line.item, line.servingSize) * line.quantity,
+    0
+  );
   const cartPeople = new Set(
     cart.map((line) => `${line.consumer.consumerType}-${line.consumer.consumerId}`)
   ).size;
@@ -85,19 +126,22 @@ export default function KhajaRecordPage() {
     setSelectedItems([]);
   }
 
-  function addItem(item: Item) {
+  function addItem(item: Item, size: ServingSize) {
+    const key = lineKey(item._id, size);
     setSelectedItems((previous) => {
-      const existing = previous.find((row) => row.item._id === item._id);
+      const existing = previous.find((row) => lineKey(row.item._id, row.servingSize) === key);
       return existing
-        ? previous.map((row) => row.item._id === item._id ? { ...row, quantity: row.quantity + 1 } : row)
-        : [...previous, { item, quantity: 1 }];
+        ? previous.map((row) =>
+            lineKey(row.item._id, row.servingSize) === key ? { ...row, quantity: row.quantity + 1 } : row
+          )
+        : [...previous, { item, servingSize: size, quantity: 1 }];
     });
   }
 
-  function reduceItem(itemId: string) {
+  function reduceItem(key: string) {
     setSelectedItems((previous) =>
       previous.flatMap((row) => {
-        if (row.item._id !== itemId) return [row];
+        if (lineKey(row.item._id, row.servingSize) !== key) return [row];
         return row.quantity > 1 ? [{ ...row, quantity: row.quantity - 1 }] : [];
       })
     );
@@ -110,9 +154,10 @@ export default function KhajaRecordPage() {
       return;
     }
 
-    const lines = selectedItems.map(({ item, quantity }) => ({
+    const lines = selectedItems.map(({ item, servingSize, quantity }) => ({
       key: crypto.randomUUID(),
       item,
+      servingSize,
       quantity,
       consumer: selected,
       businessDate,
@@ -136,6 +181,7 @@ export default function KhajaRecordPage() {
           consumerType: line.consumer.consumerType,
           consumerId: line.consumer.consumerId,
           itemId: line.item._id,
+          servingSize: line.servingSize,
           quantity: line.quantity,
           businessDate: line.businessDate,
         });
@@ -206,15 +252,7 @@ export default function KhajaRecordPage() {
               ) : recentItems.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                   {recentItems.map((item) => (
-                    <button
-                      key={item._id}
-                      type="button"
-                      onClick={() => addItem(item)}
-                      className="flex min-h-20 flex-col items-start justify-center rounded-lg border border-brand-200 bg-white px-3 py-2 text-left transition hover:border-brand-500 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                    >
-                      <span className="font-medium text-gray-900">{item.name}</span>
-                      <span className="mt-1 text-xs text-gray-500">{formatNPR(item.sellingPricePaisa)}</span>
-                    </button>
+                    <ItemChoices key={item._id} item={item} onAdd={addItem} />
                   ))}
                 </div>
               ) : !recentOrders.loading ? (
@@ -234,15 +272,7 @@ export default function KhajaRecordPage() {
               matchingItems.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                   {matchingItems.map((item) => (
-                    <button
-                      key={item._id}
-                      type="button"
-                      onClick={() => addItem(item)}
-                      className="flex min-h-16 flex-col items-start justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-left transition hover:border-brand-500 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                    >
-                      <span className="font-medium text-gray-900">{item.name}</span>
-                      <span className="mt-1 text-xs text-gray-500">{formatNPR(item.sellingPricePaisa)}</span>
-                    </button>
+                    <ItemChoices key={item._id} item={item} onAdd={addItem} />
                   ))}
                 </div>
               ) : <p className="text-sm text-gray-500">No available items match that search.</p>
@@ -251,33 +281,40 @@ export default function KhajaRecordPage() {
               {selectedItems.length > 0 && (
               <div className="flex flex-col gap-2 rounded-xl border border-gray-200 p-3">
                 <h3 className="text-sm font-semibold text-gray-900">Order items</h3>
-                {selectedItems.map(({ item, quantity }) => (
-                  <div key={item._id} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="min-w-0 truncate text-gray-800">{item.name}</span>
+                {selectedItems.map(({ item, servingSize, quantity }) => {
+                  const key = lineKey(item._id, servingSize);
+                  const label = item.servingMode === 'HALF_AND_FULL' ? servingSizeLabel(servingSize) : null;
+                  return (
+                  <div key={key} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="min-w-0 truncate text-gray-800">
+                      {item.name}
+                      {label ? <span className="ml-2 text-xs text-gray-500">{label}</span> : null}
+                    </span>
                     <div className="flex shrink-0 items-center gap-3">
                       <Button
                         variant="secondary"
                         size="sm"
                         aria-label={`Reduce ${item.name} quantity`}
-                        onClick={() => reduceItem(item._id)}
+                        onClick={() => reduceItem(key)}
                       >
                         −
                       </Button>
                       <span className="min-w-5 text-center font-medium">×{quantity}</span>
                       <span className="w-20 text-right text-gray-600">
-                        {formatNPR(item.sellingPricePaisa * quantity)}
+                        {formatNPR(servingPrice(item, servingSize) * quantity)}
                       </span>
                       <Button
                         variant="secondary"
                         size="sm"
                         aria-label={`Add ${item.name}`}
-                        onClick={() => addItem(item)}
+                        onClick={() => addItem(item, servingSize)}
                       >
                         +
                       </Button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
                 <div className="flex justify-end border-t border-gray-100 pt-2">
                   <Button onClick={addPersonToBatch}>
                     Add {selected.name} to batch
@@ -348,9 +385,14 @@ export default function KhajaRecordPage() {
               {cart.map((line) => (
                 <Tr key={line.key}>
                   <Td>{line.consumer.name}</Td>
-                  <Td>{line.item.name}</Td>
+                  <Td>
+                    {line.item.name}
+                    {line.item.servingMode === 'HALF_AND_FULL' ? (
+                      <span className="ml-2 text-xs text-gray-500">{servingSizeLabel(line.servingSize)}</span>
+                    ) : null}
+                  </Td>
                   <Td align="right">{line.quantity}</Td>
-                  <Td align="right">{formatNPR(line.item.sellingPricePaisa * line.quantity)}</Td>
+                  <Td align="right">{formatNPR(servingPrice(line.item, line.servingSize) * line.quantity)}</Td>
                   <Td align="right">
                     <Button
                       variant="ghost"
@@ -396,14 +438,19 @@ export default function KhajaRecordPage() {
                 <Tr
                   key={
                     row._id ??
-                    `${row.consumerType}:${row.consumerId}:${row.bossId ?? 'direct'}:${row.businessDate}:${row.itemId}:${row.unitPricePaisa}`
+                    `${row.consumerType}:${row.consumerId}:${row.bossId ?? 'direct'}:${row.businessDate}:${row.itemId}:${row.servingSize}:${row.unitPricePaisa}`
                   }
                 >
                   <Td>
                     <span className="font-medium text-gray-900">{row.consumerName}</span>
                     <span className="ml-2 text-xs text-gray-500">{row.consumerContext}</span>
                   </Td>
-                  <Td>{row.itemName}</Td>
+                  <Td>
+                    {row.itemName}
+                    {row.servingSize === 'HALF' ? (
+                      <span className="ml-2 text-xs text-gray-500">{servingSizeLabel(row.servingSize)}</span>
+                    ) : null}
+                  </Td>
                   <Td align="right">{row.quantity}</Td>
                   <Td align="right">{formatNPR(row.totalPaisa)}</Td>
                 </Tr>

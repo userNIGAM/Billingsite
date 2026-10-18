@@ -4,10 +4,14 @@ import { normalizeSearch, escapeRegex, buildPageMeta } from '../utils/pagination
 import { writeAuditLog } from './audit.service';
 import type { CurrentAdmin } from '../middleware/auth';
 
+type ServingMode = 'FULL_ONLY' | 'HALF_AND_FULL';
+
 export interface CreateItemInput {
   name: string;
   category?: string;
+  servingMode?: ServingMode;
   sellingPricePaisa: number;
+  halfPlatePricePaisa?: number | null;
   costPricePaisa?: number | null;
   unit?: string;
   isActive?: boolean;
@@ -17,19 +21,36 @@ export interface CreateItemInput {
 export interface UpdateItemInput {
   name?: string;
   category?: string;
+  servingMode?: ServingMode;
   sellingPricePaisa?: number;
+  halfPlatePricePaisa?: number | null;
   costPricePaisa?: number | null;
   unit?: string;
   isActive?: boolean;
   description?: string;
 }
 
+/**
+ * Resolves the half-plate price for a (possibly merged) serving configuration.
+ * HALF_AND_FULL requires a non-negative price; FULL_ONLY carries none.
+ */
+function resolveHalfPlatePrice(servingMode: ServingMode, halfPlatePricePaisa: number | null | undefined) {
+  if (servingMode !== 'HALF_AND_FULL') return null;
+  if (halfPlatePricePaisa == null) {
+    throw ApiError.validation('A half-plate price is required when half plates are offered.');
+  }
+  return halfPlatePricePaisa;
+}
+
 export async function createItem(input: CreateItemInput, admin: CurrentAdmin) {
+  const servingMode: ServingMode = input.servingMode ?? 'FULL_ONLY';
   const item = await Item.create({
     name: input.name.trim(),
     searchName: normalizeSearch(input.name),
     category: input.category ?? 'Food',
+    servingMode,
     sellingPricePaisa: input.sellingPricePaisa,
+    halfPlatePricePaisa: resolveHalfPlatePrice(servingMode, input.halfPlatePricePaisa),
     costPricePaisa: input.costPricePaisa ?? null,
     unit: input.unit ?? 'plate',
     isActive: input.isActive ?? true,
@@ -43,7 +64,12 @@ export async function createItem(input: CreateItemInput, admin: CurrentAdmin) {
     action: 'ITEM_CREATED',
     entity: 'Item',
     entityId: String(item._id),
-    after: { name: item.name, sellingPricePaisa: item.sellingPricePaisa },
+    after: {
+      name: item.name,
+      servingMode: item.servingMode,
+      sellingPricePaisa: item.sellingPricePaisa,
+      halfPlatePricePaisa: item.halfPlatePricePaisa,
+    },
   });
 
   return item;
@@ -82,7 +108,9 @@ export async function updateItem(id: string, input: UpdateItemInput, admin: Curr
   const before = {
     name: item.name,
     category: item.category,
+    servingMode: item.servingMode,
     sellingPricePaisa: item.sellingPricePaisa,
+    halfPlatePricePaisa: item.halfPlatePricePaisa,
     costPricePaisa: item.costPricePaisa,
     unit: item.unit,
     isActive: item.isActive,
@@ -100,6 +128,16 @@ export async function updateItem(id: string, input: UpdateItemInput, admin: Curr
   if (input.isActive !== undefined) item.isActive = input.isActive;
   if (input.description !== undefined) item.description = input.description;
 
+  // Serving configuration is validated against the MERGED document: a PATCH
+  // may change the mode, the half price, or both independently.
+  if (input.servingMode !== undefined || input.halfPlatePricePaisa !== undefined) {
+    const servingMode: ServingMode = (input.servingMode ?? item.servingMode ?? 'FULL_ONLY') as ServingMode;
+    const halfPlatePricePaisa =
+      input.halfPlatePricePaisa !== undefined ? input.halfPlatePricePaisa : item.halfPlatePricePaisa;
+    item.servingMode = servingMode;
+    item.halfPlatePricePaisa = resolveHalfPlatePrice(servingMode, halfPlatePricePaisa);
+  }
+
   await item.save();
 
   await writeAuditLog({
@@ -111,7 +149,9 @@ export async function updateItem(id: string, input: UpdateItemInput, admin: Curr
     before,
     after: {
       name: item.name,
+      servingMode: item.servingMode,
       sellingPricePaisa: item.sellingPricePaisa,
+      halfPlatePricePaisa: item.halfPlatePricePaisa,
       costPricePaisa: item.costPricePaisa,
     },
   });

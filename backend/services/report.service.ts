@@ -44,8 +44,9 @@ export async function salesReport(input: { from?: string; to?: string; groupBy: 
       { $match: match },
       {
         $group: {
-          _id: { itemId: '$itemId', name: '$itemNameSnapshot' },
+          _id: { itemId: '$itemId', name: '$itemNameSnapshot', servingSize: { $ifNull: ['$servingSize', 'FULL'] } },
           itemName: { $first: '$itemNameSnapshot' },
+          servingSize: { $first: { $ifNull: ['$servingSize', 'FULL'] } },
           quantity: { $sum: '$quantity' },
           revenuePaisa: { $sum: '$totalPaisa' },
         },
@@ -215,8 +216,9 @@ export async function itemsReport(input: { from?: string; to?: string }) {
     { $match: match },
     {
       $group: {
-        _id: { itemId: '$itemId', name: '$itemNameSnapshot' },
+        _id: { itemId: '$itemId', name: '$itemNameSnapshot', servingSize: { $ifNull: ['$servingSize', 'FULL'] } },
         itemName: { $first: '$itemNameSnapshot' },
+        servingSize: { $first: { $ifNull: ['$servingSize', 'FULL'] } },
         quantity: { $sum: '$quantity' },
         revenuePaisa: { $sum: '$totalPaisa' },
         costPaisa: { $sum: { $multiply: [{ $ifNull: ['$unitCostPaisa', 0] }, '$quantity'] } },

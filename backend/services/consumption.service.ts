@@ -17,11 +17,15 @@ export interface RecordConsumptionInput {
   consumerType: ConsumerType;
   consumerId: string;
   itemId: string;
+  /** HALF or FULL; omitted by old clients and treated as FULL. */
+  servingSize?: ServingSize;
   quantity: number;
   notes?: string;
   /** Business date for backdated seeding; defaults to today (Asia/Kathmandu). */
   businessDate?: string;
 }
+
+export type ServingSize = 'HALF' | 'FULL';
 
 export interface ConsumerResolution {
   khataId: string;
@@ -30,6 +34,25 @@ export interface ConsumerResolution {
   consumerName: string;
   context: string;
   khata: { _id: unknown; status: string; type: string; displayName: string };
+}
+
+/**
+ * Resolves the TRUSTED unit price for a serving size from the item's own
+ * configuration. The client never submits a price — it only names the serving
+ * size, and a HALF request against a FULL_ONLY item is rejected outright.
+ */
+export function resolveServing(
+  item: { name: string; servingMode?: string | null; sellingPricePaisa: number; halfPlatePricePaisa?: number | null },
+  requested: ServingSize
+): { servingSize: ServingSize; unitPricePaisa: number } {
+  const servingMode = item.servingMode ?? 'FULL_ONLY';
+  if (requested === 'HALF') {
+    if (servingMode !== 'HALF_AND_FULL' || item.halfPlatePricePaisa == null) {
+      throw ApiError.conflict('SERVING_SIZE_NOT_AVAILABLE', `"${item.name}" is not available as a half plate.`);
+    }
+    return { servingSize: 'HALF', unitPricePaisa: item.halfPlatePricePaisa };
+  }
+  return { servingSize: 'FULL', unitPricePaisa: item.sellingPricePaisa };
 }
 
 function assertActiveKhata(consumer: ConsumerResolution) {
@@ -81,7 +104,10 @@ export async function recordConsumption(input: RecordConsumptionInput, admin: Cu
   }
 
   const transactionCode = await nextTransactionCode();
-  const totalPaisa = multiplyPaisa(item.sellingPricePaisa, input.quantity);
+  // Server-side price. `input.servingSize` only selects WHICH configured price
+  // applies; no client-supplied amount is ever trusted (PLAN §6).
+  const { servingSize, unitPricePaisa } = resolveServing(item, input.servingSize ?? 'FULL');
+  const totalPaisa = multiplyPaisa(unitPricePaisa, input.quantity);
 
   // Hoisted out of the transaction callback so the response can return the
   // document id (see the return below).
@@ -101,7 +127,8 @@ export async function recordConsumption(input: RecordConsumptionInput, admin: Cu
           consumerContextSnapshot: consumer.context,
           itemId: item._id,
           itemNameSnapshot: item.name,
-          unitPricePaisa: item.sellingPricePaisa,
+          servingSize,
+          unitPricePaisa,
           unitCostPaisa: item.costPricePaisa ?? null,
           quantity: input.quantity,
           totalPaisa,
@@ -122,7 +149,8 @@ export async function recordConsumption(input: RecordConsumptionInput, admin: Cu
         payerStaffId: consumer.payerStaffId ?? null,
         businessDate,
         itemId: item._id,
-        unitPricePaisa: item.sellingPricePaisa,
+        servingSize,
+        unitPricePaisa,
       },
       {
         $inc: { quantity: input.quantity, totalPaisa },
@@ -155,6 +183,7 @@ export async function recordConsumption(input: RecordConsumptionInput, admin: Cu
         consumerId: input.consumerId,
         consumerName: consumer.consumerName,
         item: item.name,
+        servingSize,
         quantity: input.quantity,
         totalPaisa,
       },
@@ -173,6 +202,7 @@ export async function recordConsumption(input: RecordConsumptionInput, admin: Cu
     consumerName: consumer.consumerName,
     context: consumer.context,
     itemName: item.name,
+    servingSize,
     quantity: input.quantity,
     totalPaisa,
     businessDate,
@@ -232,6 +262,7 @@ export async function voidConsumption(transactionId: string, reason: string, adm
           consumerContextSnapshot: tx.consumerContextSnapshot,
           itemId: tx.itemId,
           itemNameSnapshot: tx.itemNameSnapshot,
+          servingSize: tx.servingSize ?? 'FULL',
           unitPricePaisa: tx.unitPricePaisa,
           unitCostPaisa: tx.unitCostPaisa,
           quantity: reversalQuantity,
@@ -263,6 +294,7 @@ export async function voidConsumption(transactionId: string, reason: string, adm
         payerStaffId: tx.payerStaffId ?? null,
         businessDate: tx.businessDate,
         itemId: tx.itemId,
+        servingSize: tx.servingSize ?? 'FULL',
         unitPricePaisa: tx.unitPricePaisa,
       },
       {
@@ -336,6 +368,7 @@ export interface DailyRow {
   consumerContext: string;
   itemId: string;
   itemName: string;
+  servingSize: ServingSize;
   unitPricePaisa: number;
   quantity: number;
   totalPaisa: number;
@@ -367,6 +400,7 @@ export async function getDailyConsumption(params: { date?: string; khataId?: str
     consumerContext: r.consumerContextSnapshot,
     itemId: String(r.itemId),
     itemName: r.itemNameSnapshot,
+    servingSize: (r.servingSize ?? 'FULL') as ServingSize,
     unitPricePaisa: r.unitPricePaisa,
     quantity: r.quantity,
     totalPaisa: r.totalPaisa,

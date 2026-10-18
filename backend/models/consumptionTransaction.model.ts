@@ -4,6 +4,9 @@ import mongoose, { Schema, InferSchemaType } from 'mongoose';
 export const CONSUMER_TYPES = ['INDIVIDUAL', 'BOSS', 'STAFF', 'OFFICE'] as const;
 export const ENTRY_TYPES = ['ORDER', 'REVERSAL'] as const;
 export const TX_STATUSES = ['ACTIVE', 'VOIDED'] as const;
+// Serving size of the ordered line. Missing on rows written before the
+// half/full-plate feature, which were all full plates.
+export const SERVING_SIZES = ['HALF', 'FULL'] as const;
 
 /**
  * Immutable event log (§3.6). Corrections are NEVER in-place edits: they
@@ -32,6 +35,7 @@ const consumptionTransactionSchema = new Schema(
     consumerContextSnapshot: { type: String, required: true, default: '' },
     itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
     itemNameSnapshot: { type: String, required: true },
+    servingSize: { type: String, enum: SERVING_SIZES, default: 'FULL' },
     unitPricePaisa: { type: Number, required: true, min: 0 }, // SNAPSHOT
     unitCostPaisa: { type: Number, default: null, min: 0 }, // SNAPSHOT — real COGS
     // Signed: positive on ORDER, negative on REVERSAL. The per-type check

@@ -16,7 +16,7 @@ import { useAsync } from '../../../hooks/useAsync';
 import { useDebounced } from '../../../hooks/useDebounce';
 import { itemService, type CreateItemInput } from '../../../lib/services/operationService';
 import { ApiError } from '../../../lib/apiClient';
-import type { Item } from '../../../types/api';
+import type { Item, ServingMode } from '../../../types/api';
 import { formatNPR, paisaToRupees, rupeesToPaisa } from '../../../utils/money';
 
 export default function ItemsPage() {
@@ -85,9 +85,9 @@ export default function ItemsPage() {
                 <Tr>
                   <Th>Name</Th>
                   <Th>Category</Th>
+                  <Th>Serving</Th>
                   <Th align="right">Selling</Th>
                   <Th align="right">Cost</Th>
-                  <Th>Unit</Th>
                   <Th>Status</Th>
                   <Th align="right"> </Th>
                 </Tr>
@@ -97,9 +97,20 @@ export default function ItemsPage() {
                   <Tr key={item._id}>
                     <Td className="font-medium text-gray-900">{item.name}</Td>
                     <Td>{item.category || '—'}</Td>
-                    <Td align="right">{formatNPR(item.sellingPricePaisa)}</Td>
+                    <Td>
+                      <Badge tone={item.servingMode === 'HALF_AND_FULL' ? 'blue' : 'gray'}>
+                        {item.servingMode === 'HALF_AND_FULL' ? 'Half + Full' : 'Full only'}
+                      </Badge>
+                    </Td>
+                    <Td align="right">
+                      <span className="block">{formatNPR(item.sellingPricePaisa)}</span>
+                      {item.servingMode === 'HALF_AND_FULL' && item.halfPlatePricePaisa != null ? (
+                        <span className="block text-xs text-gray-500">
+                          Half {formatNPR(item.halfPlatePricePaisa)}
+                        </span>
+                      ) : null}
+                    </Td>
                     <Td align="right">{item.costPricePaisa != null ? formatNPR(item.costPricePaisa) : '—'}</Td>
-                    <Td>{item.unit || '—'}</Td>
                     <Td><Badge tone={item.isActive ? 'green' : 'red'}>{item.isActive ? 'ACTIVE' : 'INACTIVE'}</Badge></Td>
                     <Td align="right">
                       <div className="flex justify-end gap-1">
@@ -150,7 +161,11 @@ function ItemModal({
   const toast = useToast();
   const [name, setName] = useState(item?.name ?? '');
   const [category, setCategory] = useState(item?.category ?? '');
+  const [servingMode, setServingMode] = useState<ServingMode>(item?.servingMode ?? 'FULL_ONLY');
   const [selling, setSelling] = useState(item ? String(paisaToRupees(item.sellingPricePaisa)) : '');
+  const [half, setHalf] = useState(
+    item?.halfPlatePricePaisa != null ? String(paisaToRupees(item.halfPlatePricePaisa)) : ''
+  );
   const [cost, setCost] = useState(item?.costPricePaisa != null ? String(paisaToRupees(item.costPricePaisa)) : '');
   const [unit, setUnit] = useState(item?.unit ?? '');
   const [description, setDescription] = useState(item?.description ?? '');
@@ -164,7 +179,12 @@ function ItemModal({
     }
     const sellingPaisa = rupeesToPaisa(Number(selling));
     if (!Number.isFinite(sellingPaisa) || sellingPaisa < 0) {
-      setError('Enter a valid selling price.');
+      setError('Enter a valid full-plate price.');
+      return;
+    }
+    const halfPaisa = servingMode === 'HALF_AND_FULL' ? rupeesToPaisa(Number(half)) : null;
+    if (servingMode === 'HALF_AND_FULL' && (half.trim() === '' || !Number.isFinite(halfPaisa) || (halfPaisa as number) < 0)) {
+      setError('Enter a valid half-plate price.');
       return;
     }
     setSaving(true);
@@ -172,7 +192,9 @@ function ItemModal({
     const payload: CreateItemInput = {
       name: name.trim(),
       category: category.trim(),
+      servingMode,
       sellingPricePaisa: sellingPaisa,
+      halfPlatePricePaisa: servingMode === 'HALF_AND_FULL' ? halfPaisa : null,
       costPricePaisa: cost.trim() === '' ? null : rupeesToPaisa(Number(cost)),
       unit: unit.trim() || undefined,
       description: description.trim() || undefined,
@@ -209,8 +231,53 @@ function ItemModal({
         <Input label="Name" required value={name} onChange={(e) => setName(e.target.value)} className="sm:col-span-2" />
         <Input label="Category" value={category} onChange={(e) => setCategory(e.target.value)} />
         <Input label="Unit" placeholder="plate, cup, pc" value={unit} onChange={(e) => setUnit(e.target.value)} />
-        <Input label="Selling price (NPR)" type="number" step="0.01" required value={selling} onChange={(e) => setSelling(e.target.value)} />
-        <Input label="Cost price (NPR)" type="number" step="0.01" hint="Optional — used for profit estimates." value={cost} onChange={(e) => setCost(e.target.value)} />
+        <Select
+          label="Serving options"
+          className="sm:col-span-2"
+          value={servingMode}
+          onChange={(e) => setServingMode(e.target.value as ServingMode)}
+          hint="Half plate and full plate lets you charge a different price for each serving size."
+        >
+          <option value="FULL_ONLY">Full plate only</option>
+          <option value="HALF_AND_FULL">Half plate and full plate</option>
+        </Select>
+        <Input
+          label="Full-plate price (NPR)"
+          type="number"
+          step="0.01"
+          required
+          value={selling}
+          onChange={(e) => setSelling(e.target.value)}
+        />
+        {servingMode === 'HALF_AND_FULL' ? (
+          <Input
+            label="Half-plate price (NPR)"
+            type="number"
+            step="0.01"
+            required
+            value={half}
+            onChange={(e) => setHalf(e.target.value)}
+          />
+        ) : (
+          <Input
+            label="Cost price (NPR)"
+            type="number"
+            step="0.01"
+            hint="Optional — used for profit estimates."
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+          />
+        )}
+        {servingMode === 'HALF_AND_FULL' ? (
+          <Input
+            label="Cost price (NPR)"
+            type="number"
+            step="0.01"
+            hint="Optional — used for profit estimates."
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+          />
+        ) : null}
         <div className="sm:col-span-2">
           <Textarea label="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>

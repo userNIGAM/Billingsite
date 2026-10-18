@@ -5,6 +5,9 @@ export const createConsumptionSchema = z.object({
   consumerType: z.enum(['INDIVIDUAL', 'BOSS', 'STAFF', 'OFFICE']),
   consumerId: objectId,
   itemId: objectId,
+  // Omitted by old clients / full-plate-only items → treated as FULL. The
+  // service rejects HALF for an item that does not offer it.
+  servingSize: z.enum(['HALF', 'FULL']).optional().default('FULL'),
   quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1').max(1000),
   // Must be in the schema: validate() replaces req.body with the Zod parse
   // output, which strips unknown keys. Without this the service's

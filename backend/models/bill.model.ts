@@ -8,6 +8,7 @@ const lineItemSchema = new Schema(
     businessDate: { type: String, required: true },
     itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
     itemNameSnapshot: { type: String, required: true },
+    servingSize: { type: String, enum: ['HALF', 'FULL'], default: 'FULL' },
     quantity: { type: Number, required: true, min: 1 },
     unitPricePaisa: { type: Number, required: true, min: 0 },
     totalPaisa: { type: Number, required: true, min: 0 },

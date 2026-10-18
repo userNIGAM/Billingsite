@@ -26,6 +26,7 @@ interface LineItemRow {
   businessDate: string;
   itemId: mongoose.Types.ObjectId;
   itemNameSnapshot: string;
+  servingSize: 'HALF' | 'FULL';
   quantity: number;
   unitPricePaisa: number;
   totalPaisa: number;
@@ -247,10 +248,16 @@ export async function generateBill(input: GenerateBillInput, admin: CurrentAdmin
     },
     {
       $group: {
-        _id: { businessDate: '$businessDate', itemId: '$itemId', unitPricePaisa: '$unitPricePaisa' },
+        _id: {
+          businessDate: '$businessDate',
+          itemId: '$itemId',
+          servingSize: '$servingSize',
+          unitPricePaisa: '$unitPricePaisa',
+        },
         businessDate: { $first: '$businessDate' },
         itemId: { $first: '$itemId' },
         itemNameSnapshot: { $first: '$itemNameSnapshot' },
+        servingSize: { $first: { $ifNull: ['$servingSize', 'FULL'] } },
         quantity: { $sum: '$quantity' },
         unitPricePaisa: { $first: '$unitPricePaisa' },
         totalPaisa: { $sum: '$totalPaisa' },
@@ -333,6 +340,7 @@ export async function generateBill(input: GenerateBillInput, admin: CurrentAdmin
             businessDate: r.businessDate,
             itemId: r.itemId,
             itemNameSnapshot: r.itemNameSnapshot,
+            servingSize: r.servingSize ?? 'FULL',
             quantity: r.quantity,
             unitPricePaisa: r.unitPricePaisa,
             totalPaisa: r.totalPaisa,

@@ -2,7 +2,7 @@ import mongoose, { Schema, InferSchemaType } from 'mongoose';
 
 /**
  * Fast read model (§3.7). Grain: ONE document per
- *   (consumerId, bossId, payerStaffId, businessDate, itemId, unitPricePaisa).
+ *   (consumerId, bossId, payerStaffId, businessDate, itemId, servingSize, unitPricePaisa).
  *
  * The unique compound index is what makes the whole aggregation strategy
  * concurrency-safe: two admins tapping "Tea" for the same person at the same
@@ -10,6 +10,8 @@ import mongoose, { Schema, InferSchemaType } from 'mongoose';
  *
  * Including unitPricePaisa in the key means a mid-day price change produces
  * two cells (e.g. Tea ×2 @30, Tea ×1 @35) — never a corrupted single row.
+ * servingSize is part of the key so a half plate and a full plate of the same
+ * item stay separate rows even when the admin prices them identically.
  *
  * bossId IS part of the key because a consumer's billing group is not
  * immutable: when staff transfer between bosses (E-5) their history keeps the
@@ -28,6 +30,7 @@ const dailyConsumptionSchema = new Schema({
   consumerContextSnapshot: { type: String, required: true, default: '' },
   itemId: { type: Schema.Types.ObjectId, ref: 'Item', required: true },
   itemNameSnapshot: { type: String, required: true },
+  servingSize: { type: String, enum: ['HALF', 'FULL'], default: 'FULL' },
   unitPricePaisa: { type: Number, required: true, min: 0 },
   unitCostPaisa: { type: Number, default: null, min: 0 },
   businessDate: { type: String, required: true },
@@ -37,7 +40,7 @@ const dailyConsumptionSchema = new Schema({
 });
 
 dailyConsumptionSchema.index(
-  { consumerId: 1, bossId: 1, payerStaffId: 1, businessDate: 1, itemId: 1, unitPricePaisa: 1 },
+  { consumerId: 1, bossId: 1, payerStaffId: 1, businessDate: 1, itemId: 1, servingSize: 1, unitPricePaisa: 1 },
   { unique: true }
 );
 dailyConsumptionSchema.index({ khataId: 1, businessDate: -1 });

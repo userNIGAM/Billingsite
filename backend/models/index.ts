@@ -20,7 +20,7 @@ export { CanteenProfile } from './canteenProfile.model';
 export { Khata, KHATA_TYPES, KHATA_STATUSES } from './khata.model';
 export { Boss, BOSS_STATUSES } from './boss.model';
 export { Staff, STAFF_STATUSES } from './staff.model';
-export { Item } from './item.model';
+export { Item, SERVING_MODES, SERVING_SIZES } from './item.model';
 export { ConsumptionTransaction, CONSUMER_TYPES, ENTRY_TYPES, TX_STATUSES } from './consumptionTransaction.model';
 export { DailyConsumption } from './dailyConsumption.model';
 export { Bill, BILL_SCOPES, BILL_STATUSES } from './bill.model';

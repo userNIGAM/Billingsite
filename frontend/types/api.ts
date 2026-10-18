@@ -27,6 +27,14 @@ export type DigitalChannel = 'ESEWA' | 'KHALTI' | 'BANK' | 'QR' | null;
 export type BillStatus = 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'OVERPAID';
 export type BillScope = 'INDIVIDUAL' | 'BOSS_GROUP' | 'STAFF' | 'OFFICE';
 export type EntryType = 'ORDER' | 'REVERSAL';
+/** Serving size of an ordered line. `FULL` is the default/legacy value. */
+export type ServingSize = 'HALF' | 'FULL';
+/** Item serving configuration. `FULL_ONLY` is the default/legacy value. */
+export type ServingMode = 'FULL_ONLY' | 'HALF_AND_FULL';
+
+export function servingSizeLabel(size: ServingSize | null | undefined): string {
+  return size === 'HALF' ? 'Half Plate' : 'Full Plate';
+}
 
 export interface Khata {
   _id: string;
@@ -102,7 +110,9 @@ export interface Item {
   _id: string;
   name: string;
   category: string;
+  servingMode: ServingMode;
   sellingPricePaisa: number;
+  halfPlatePricePaisa: number | null;
   costPricePaisa: number | null;
   unit: string;
   isActive: boolean;
@@ -121,6 +131,7 @@ export interface ConsumptionTransaction {
   consumerContextSnapshot: string;
   itemId: string;
   itemNameSnapshot: string;
+  servingSize: ServingSize;
   unitPricePaisa: number;
   unitCostPaisa: number | null;
   quantity: number;
@@ -145,6 +156,7 @@ export interface DailyConsumptionRow {
   consumerContext: string;
   itemId: string;
   itemName: string;
+  servingSize: ServingSize;
   unitPricePaisa: number;
   unitCostPaisa: number | null;
   businessDate: string;
@@ -156,6 +168,7 @@ export interface BillLineItem {
   businessDate: string;
   itemId: string;
   itemNameSnapshot: string;
+  servingSize?: ServingSize;
   quantity: number;
   unitPricePaisa: number;
   totalPaisa: number;

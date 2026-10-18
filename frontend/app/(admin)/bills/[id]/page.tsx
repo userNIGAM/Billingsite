@@ -19,6 +19,7 @@ import { settingsService } from '../../../../lib/services/insightService';
 import { ApiError } from '../../../../lib/apiClient';
 import { formatNPR } from '../../../../utils/money';
 import { formatDate, formatDateTime } from '../../../../utils/date';
+import { servingSizeLabel } from '../../../../types/api';
 
 export default function BillDetailPage() {
   const params = useParams<{ id: string }>();
@@ -138,7 +139,12 @@ export default function BillDetailPage() {
                 <Tr key={`${line.itemId}-${idx}`}>
                   <Td>{idx + 1}</Td>
                   <Td>{formatDate(line.businessDate)}</Td>
-                  <Td>{line.itemNameSnapshot}</Td>
+                  <Td>
+                    {line.itemNameSnapshot}
+                    {line.servingSize === 'HALF' ? (
+                      <span className="ml-2 text-xs text-gray-500">{servingSizeLabel(line.servingSize)}</span>
+                    ) : null}
+                  </Td>
                   <Td align="right">{line.quantity}</Td>
                   <Td align="right">{formatNPR(line.unitPricePaisa)}</Td>
                   <Td align="right">{formatNPR(line.totalPaisa)}</Td>
