@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { dateStr, objectId, pageQuery } from './common';
 
 export const createConsumptionSchema = z.object({
-  consumerType: z.enum(['INDIVIDUAL', 'BOSS', 'STAFF']),
+  consumerType: z.enum(['INDIVIDUAL', 'BOSS', 'STAFF', 'OFFICE']),
   consumerId: objectId,
   itemId: objectId,
   quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1').max(1000),

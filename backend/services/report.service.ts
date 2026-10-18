@@ -6,6 +6,7 @@ import { Expense } from '../models/expense.model';
 import { Khata } from '../models/khata.model';
 import { Boss } from '../models/boss.model';
 import { Staff } from '../models/staff.model';
+import { unbilledOpeningByKhata } from './opening.service';
 import { ApiError } from '../utils/ApiError';
 import { validateDateStr, isBeforeOrEqual } from '../utils/date';
 
@@ -183,13 +184,15 @@ export async function customersReport() {
   const pays = byId(paymentsAgg);
   const cons = byId(consumptionAgg);
 
+  const openings = await unbilledOpeningByKhata();
+
   return khatas
     .map((k) => {
       const id = String(k._id);
       const consumed = cons.get(id)?.consumed ?? 0;
       const billed = bills.get(id)?.billed ?? 0;
       const paidCash = pays.get(id)?.paid ?? 0;
-      const due = (bills.get(id)?.due ?? 0) + k.openingBalancePaisa;
+      const due = (bills.get(id)?.due ?? 0) + (openings.get(id) ?? 0);
       return {
         khataId: id,
         khataName: k.displayName,
@@ -252,6 +255,7 @@ export async function officesReport() {
   const consMap = new Map(consAgg.map((r) => [String(r._id), r.total]));
   const billMap = new Map(billAgg.map((r) => [String(r._id), r]));
   const payMap = new Map(payAgg.map((r) => [String(r._id), r.paid]));
+  const openings = await unbilledOpeningByKhata(offices.map((o) => o._id));
 
   return offices.map((o) => {
     const id = String(o._id);
@@ -265,7 +269,7 @@ export async function officesReport() {
       consumptionTotalPaisa: consMap.get(id) ?? 0,
       billedPaisa: bill?.billed ?? 0,
       paidPaisa: payMap.get(id) ?? 0,
-      outstandingPaisa: (bill?.due ?? 0) + o.openingBalancePaisa,
+      outstandingPaisa: (bill?.due ?? 0) + (openings.get(id) ?? 0),
     };
   });
 }

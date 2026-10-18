@@ -22,7 +22,7 @@ const dailyConsumptionSchema = new Schema({
   khataId: { type: Schema.Types.ObjectId, ref: 'Khata', required: true },
   bossId: { type: Schema.Types.ObjectId, ref: 'Boss', default: null },
   payerStaffId: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
-  consumerType: { type: String, enum: ['INDIVIDUAL', 'BOSS', 'STAFF'], required: true },
+  consumerType: { type: String, enum: ['INDIVIDUAL', 'BOSS', 'STAFF', 'OFFICE'], required: true },
   consumerId: { type: Schema.Types.ObjectId, required: true },
   consumerNameSnapshot: { type: String, required: true },
   consumerContextSnapshot: { type: String, required: true, default: '' },

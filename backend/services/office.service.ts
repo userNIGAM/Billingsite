@@ -8,12 +8,15 @@ import { ApiError } from '../utils/ApiError';
 import { validateDateStr, todayBusinessDate } from '../utils/date';
 import { normalizeSearch, escapeRegex, buildPageMeta } from '../utils/pagination';
 import { writeAuditLog } from './audit.service';
+import { assertStaffOpening } from './opening.service';
 import type { CurrentAdmin } from '../middleware/auth';
 
 export interface CreateBossInput {
   khataId: string;
   name: string;
   phone?: string;
+  address?: string;
+  openingBalancePaisa?: number;
   startDate: string;
   notes?: string;
 }
@@ -21,6 +24,8 @@ export interface CreateBossInput {
 export interface UpdateBossInput {
   name?: string;
   phone?: string;
+  address?: string;
+  openingBalancePaisa?: number;
   startDate?: string;
   endDate?: string | null;
   status?: 'ACTIVE' | 'INACTIVE';
@@ -32,7 +37,9 @@ export interface CreateStaffInput {
   bossId?: string;
   name: string;
   billingResponsibility?: 'OFFICE' | 'SELF';
+  openingBalancePaisa?: number;
   phone?: string;
+  address?: string;
   startDate: string;
   notes?: string;
 }
@@ -40,7 +47,9 @@ export interface CreateStaffInput {
 export interface UpdateStaffInput {
   name?: string;
   billingResponsibility?: 'OFFICE' | 'SELF';
+  openingBalancePaisa?: number;
   phone?: string;
+  address?: string;
   startDate?: string;
   endDate?: string | null;
   status?: 'ACTIVE' | 'INACTIVE';
@@ -68,6 +77,9 @@ function validateCreateDates(startDate: string) {
 
 export async function createBoss(input: CreateBossInput, admin: CurrentAdmin) {
   const khata = await assertOfficeKhata(input.khataId);
+  if ((khata.billingMode ?? 'MIXED') === 'DIRECT') {
+    throw ApiError.validation('A DIRECT office bills only the office itself and cannot have bosses. Change its billing mode first.');
+  }
   validateCreateDates(input.startDate);
 
   const boss = await Boss.create({
@@ -75,6 +87,8 @@ export async function createBoss(input: CreateBossInput, admin: CurrentAdmin) {
     name: input.name.trim(),
     searchName: normalizeSearch(input.name),
     phone: input.phone ?? '',
+    address: input.address ?? '',
+    openingBalancePaisa: input.openingBalancePaisa ?? 0,
     isDefault: false,
     status: 'ACTIVE',
     startDate: input.startDate,
@@ -100,6 +114,8 @@ export async function updateBoss(id: string, input: UpdateBossInput, admin: Curr
   const before = {
     name: boss.name,
     phone: boss.phone,
+    address: boss.address ?? '',
+    openingBalancePaisa: boss.openingBalancePaisa ?? 0,
     startDate: boss.startDate,
     endDate: boss.endDate,
     status: boss.status,
@@ -111,6 +127,8 @@ export async function updateBoss(id: string, input: UpdateBossInput, admin: Curr
     boss.searchName = normalizeSearch(input.name);
   }
   if (input.phone !== undefined) boss.phone = input.phone;
+  if (input.address !== undefined) boss.address = input.address;
+  if (input.openingBalancePaisa !== undefined) boss.openingBalancePaisa = input.openingBalancePaisa;
   if (input.startDate !== undefined) {
     validateCreateDates(input.startDate);
     boss.startDate = input.startDate;
@@ -128,7 +146,12 @@ export async function updateBoss(id: string, input: UpdateBossInput, admin: Curr
     entity: 'Boss',
     entityId: String(boss._id),
     before,
-    after: { name: boss.name, phone: boss.phone },
+    after: {
+      name: boss.name,
+      phone: boss.phone,
+      address: boss.address ?? '',
+      openingBalancePaisa: boss.openingBalancePaisa ?? 0,
+    },
   });
 
   return boss;
@@ -177,33 +200,52 @@ export async function listBosses(params: { khataId?: string; status?: string }) 
   const bosses = await Boss.find(filter).sort({ isDefault: -1, name: 1 }).lean();
   const ids = bosses.map((b) => String(b._id));
 
-  const [dues, staffCounts] = await Promise.all([bossDueMap(ids), countStaffByBoss(ids)]);
+  const [dues, staffCounts, billCounts] = await Promise.all([
+    bossDueMap(ids),
+    countStaffByBoss(ids),
+    bossBillCountMap(ids),
+  ]);
 
-  return bosses.map((boss) => ({
-    _id: String(boss._id),
-    khataId: String(boss.khataId),
-    name: boss.name,
-    phone: boss.phone,
-    isDefault: boss.isDefault,
-    status: boss.status,
-    startDate: boss.startDate,
-    endDate: boss.endDate,
-    notes: boss.notes,
-    duePaisa: dues.get(String(boss._id)) ?? 0,
-    staffCount: staffCounts.get(String(boss._id)) ?? 0,
-  }));
+  return bosses.map((boss) => {
+    const id = String(boss._id);
+    // Show the boss's migrated opening balance as due only until their first
+    // group bill exists (the opening is then carried by that bill).
+    const openingShown = (billCounts.get(id) ?? 0) === 0 ? (boss.openingBalancePaisa ?? 0) : 0;
+    return {
+      _id: id,
+      khataId: String(boss.khataId),
+      name: boss.name,
+      phone: boss.phone,
+      address: boss.address ?? '',
+      openingBalancePaisa: boss.openingBalancePaisa ?? 0,
+      isDefault: boss.isDefault,
+      status: boss.status,
+      startDate: boss.startDate,
+      endDate: boss.endDate,
+      notes: boss.notes,
+      duePaisa: (dues.get(id) ?? 0) + openingShown,
+      staffCount: staffCounts.get(id) ?? 0,
+    };
+  });
 }
 
 export async function bossSummary(id: string) {
   const boss = await Boss.findById(id).lean();
   if (!boss) throw ApiError.notFound('Boss not found.', 'BOSS_NOT_FOUND');
 
-  const [due, transactions] = await Promise.all([
+  const [due, transactions, billCount] = await Promise.all([
     getBossDue(boss._id.toString()),
     ConsumptionTotal(boss._id.toString()),
+    Bill.countDocuments({ bossId: boss._id, staffId: null, isVoided: false }),
   ]);
 
-  return { boss: { ...boss, _id: String(boss._id) }, duePaisa: due, consumptionTotalPaisa: transactions };
+  const openingShown = billCount === 0 ? (boss.openingBalancePaisa ?? 0) : 0;
+
+  return {
+    boss: { ...boss, _id: String(boss._id), openingBalancePaisa: boss.openingBalancePaisa ?? 0, address: boss.address ?? '' },
+    duePaisa: due + openingShown,
+    consumptionTotalPaisa: transactions,
+  };
 }
 
 async function ConsumptionTotal(bossId: string) {
@@ -240,28 +282,40 @@ export async function bossDueMap(bossIds: string[]): Promise<Map<string, number>
   return map;
 }
 
+async function bossBillCountMap(bossIds: string[]): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (bossIds.length === 0) return map;
+  const rows = await Bill.aggregate<{ _id: mongoose.Types.ObjectId; count: number }>([
+    { $match: { bossId: { $in: bossIds.map((id) => new mongoose.Types.ObjectId(id)) }, staffId: null, isVoided: false } },
+    { $group: { _id: '$bossId', count: { $sum: 1 } } },
+  ]);
+  for (const row of rows) map.set(String(row._id), row.count);
+  return map;
+}
+
 // ---------------------------------------------------------------------------
 // Staff
 // ---------------------------------------------------------------------------
-
-async function resolveDefaultBoss(khataId: string) {
-  const defaultBoss = await Boss.findOne({ khataId, isDefault: true }).lean();
-  if (!defaultBoss) throw ApiError.internal('Office has no default billing group configured.');
-  return defaultBoss;
-}
 
 export async function createStaff(input: CreateStaffInput, admin: CurrentAdmin) {
   const khata = await assertOfficeKhata(input.khataId);
   validateCreateDates(input.startDate);
 
-  let bossId = input.bossId;
-  if (!bossId) {
-    const defaultBoss = await resolveDefaultBoss(khata._id.toString());
-    bossId = String(defaultBoss._id);
-  } else {
+  const mode = khata.billingMode ?? 'MIXED';
+  const bossId: string | null = input.bossId ?? null;
+  if (bossId) {
     const boss = await Boss.findOne({ _id: bossId, khataId: khata._id });
     if (!boss) throw ApiError.notFound('Boss not found for this office.', 'BOSS_NOT_FOUND');
+  } else if (mode === 'DIRECT') {
+    throw ApiError.validation('A DIRECT office has no staff. Change its billing mode to MIXED or GROUPS first.');
+  } else if (mode === 'GROUPS') {
+    // GROUPS offices have no office ledger to absorb OFFICE-responsibility
+    // staff, so a boss-less staff member would have nowhere to bill.
+    throw ApiError.validation('Every staff member of a GROUPS office must belong to a boss (bossId is required).');
   }
+
+  const billingResponsibility = input.billingResponsibility ?? khata.defaultStaffBillingResponsibility ?? 'OFFICE';
+  assertStaffOpening(billingResponsibility, input.openingBalancePaisa ?? 0);
 
   const staff = await Staff.create({
     khataId: khata._id,
@@ -269,7 +323,9 @@ export async function createStaff(input: CreateStaffInput, admin: CurrentAdmin) 
     name: input.name.trim(),
     searchName: normalizeSearch(input.name),
     phone: input.phone ?? '',
-    billingResponsibility: input.billingResponsibility ?? khata.defaultStaffBillingResponsibility ?? 'OFFICE',
+    address: input.address ?? '',
+    billingResponsibility,
+    openingBalancePaisa: input.openingBalancePaisa ?? 0,
     status: 'ACTIVE',
     startDate: input.startDate,
     notes: input.notes ?? '',
@@ -294,11 +350,13 @@ export async function updateStaff(id: string, input: UpdateStaffInput, admin: Cu
   const before = {
     name: staff.name,
     phone: staff.phone,
+    address: staff.address ?? '',
     startDate: staff.startDate,
     endDate: staff.endDate,
     status: staff.status,
     notes: staff.notes,
     billingResponsibility: staff.billingResponsibility ?? 'OFFICE',
+    openingBalancePaisa: staff.openingBalancePaisa ?? 0,
   };
 
   if (input.name !== undefined) {
@@ -306,7 +364,9 @@ export async function updateStaff(id: string, input: UpdateStaffInput, admin: Cu
     staff.searchName = normalizeSearch(input.name);
   }
   if (input.phone !== undefined) staff.phone = input.phone;
+  if (input.address !== undefined) staff.address = input.address;
   if (input.billingResponsibility !== undefined) staff.billingResponsibility = input.billingResponsibility;
+  if (input.openingBalancePaisa !== undefined) staff.openingBalancePaisa = input.openingBalancePaisa;
   if (input.startDate !== undefined) {
     validateCreateDates(input.startDate);
     staff.startDate = input.startDate;
@@ -314,6 +374,7 @@ export async function updateStaff(id: string, input: UpdateStaffInput, admin: Cu
   if (input.endDate !== undefined) staff.endDate = input.endDate || null;
   if (input.status !== undefined) staff.status = input.status;
   if (input.notes !== undefined) staff.notes = input.notes;
+  assertStaffOpening(staff.billingResponsibility ?? 'OFFICE', staff.openingBalancePaisa ?? 0);
 
   await staff.save();
 
@@ -327,6 +388,7 @@ export async function updateStaff(id: string, input: UpdateStaffInput, admin: Cu
     after: {
       name: staff.name,
       phone: staff.phone,
+      address: staff.address ?? '',
       status: staff.status,
       billingResponsibility: staff.billingResponsibility ?? 'OFFICE',
     },
@@ -336,18 +398,42 @@ export async function updateStaff(id: string, input: UpdateStaffInput, admin: Cu
 }
 
 /**
- * Moves a staff member to another boss's billing group. Only Staff.bossId
- * changes — historical transactions keep their original bossId, so each
- * group's old billing remains correct (E-5).
+ * Moves a staff member to another boss's billing group, or into the office
+ * pool (newBossId null, valid in MIXED offices). Only Staff.bossId changes —
+ * historical transactions keep their original bossId, so each group's old
+ * billing remains correct (E-5).
  */
-export async function transferStaff(id: string, newBossId: string, admin: CurrentAdmin) {
+export async function transferStaff(id: string, newBossId: string | null, admin: CurrentAdmin) {
   const staff = await Staff.findById(id);
   if (!staff) throw ApiError.notFound('Staff member not found.', 'STAFF_NOT_FOUND');
+
+  const before = { bossId: staff.bossId ? String(staff.bossId) : null };
+  if (newBossId === null || newBossId === undefined || newBossId === '') {
+    const khata = await Khata.findById(staff.khataId).select('billingMode').lean();
+    const mode = khata?.billingMode ?? 'MIXED';
+    if (mode === 'DIRECT') {
+      throw ApiError.validation('A DIRECT office has no staff groups — change the billing mode first.');
+    }
+    if (mode === 'GROUPS') {
+      throw ApiError.validation('A GROUPS office has no office pool — move this staff member to a boss instead.');
+    }
+    staff.bossId = null;
+    await staff.save();
+    await writeAuditLog({
+      adminId: admin.adminId,
+      adminNameSnapshot: admin.adminName,
+      action: 'STAFF_TRANSFERRED',
+      entity: 'Staff',
+      entityId: String(staff._id),
+      before,
+      after: { bossId: null, newBossName: 'Office pool' },
+    });
+    return staff;
+  }
 
   const newBoss = await Boss.findOne({ _id: newBossId, khataId: staff.khataId });
   if (!newBoss) throw ApiError.conflict('INVALID_BOSS', 'The target boss does not belong to this staff member\'s office.');
 
-  const before = { bossId: String(staff.bossId) };
   staff.bossId = newBoss._id;
   await staff.save();
 
@@ -411,31 +497,46 @@ export async function listStaff(params: {
     Staff.countDocuments(filter),
   ]);
 
+  const bossIds = staffs.map((s) => s.bossId).filter((id): id is mongoose.Types.ObjectId => !!id);
   const [bossDocs, staffDueRows] = await Promise.all([
-    Boss.find({ _id: { $in: staffs.map((s) => s.bossId) } }).lean(),
-    Bill.aggregate<{ _id: mongoose.Types.ObjectId; total: number }>([
+    bossIds.length > 0 ? Boss.find({ _id: { $in: bossIds } }).lean() : Promise.resolve([]),
+    Bill.aggregate<{ _id: mongoose.Types.ObjectId; total: number; count: number }>([
       { $match: { staffId: { $in: staffs.map((s) => s._id) }, isVoided: false } },
-      { $group: { _id: '$staffId', total: { $sum: '$duePaisa' } } },
+      { $group: { _id: '$staffId', total: { $sum: '$duePaisa' }, count: { $sum: 1 } } },
     ]),
   ]);
   const bossNames = new Map(bossDocs.map((boss) => [String(boss._id), boss.name]));
   const staffDues = new Map(staffDueRows.map((row) => [String(row._id), row.total]));
+  const staffBillCounts = new Map(staffDueRows.map((row) => [String(row._id), row.count]));
 
   return {
-    rows: staffs.map((s) => ({
-      _id: String(s._id),
-      khataId: String(s.khataId),
-      bossId: String(s.bossId),
-      bossName: bossNames.get(String(s.bossId)) ?? '',
-      billingResponsibility: s.billingResponsibility ?? 'OFFICE',
-      duePaisa: staffDues.get(String(s._id)) ?? 0,
-      name: s.name,
-      phone: s.phone,
-      status: s.status,
-      startDate: s.startDate,
-      endDate: s.endDate,
-      notes: s.notes,
-    })),
+    rows: staffs.map((s) => {
+      const isSelf = (s.billingResponsibility ?? 'OFFICE') === 'SELF';
+      // The migrated opening balance is only shown until the staff member's
+      // first bill exists — after that it lives inside that bill's due
+      // (bill.service folds it into the first bill), so adding it here too
+      // would double-count it.
+      const openingShown = isSelf && (staffBillCounts.get(String(s._id)) ?? 0) === 0
+        ? (s.openingBalancePaisa ?? 0)
+        : 0;
+      return {
+        _id: String(s._id),
+        khataId: String(s.khataId),
+        bossId: s.bossId ? String(s.bossId) : null,
+        // Null bossName = office pool (boss-less staff member).
+        bossName: s.bossId ? bossNames.get(String(s.bossId)) ?? '' : '',
+        billingResponsibility: s.billingResponsibility ?? 'OFFICE',
+        openingBalancePaisa: s.openingBalancePaisa ?? 0,
+        duePaisa: (staffDues.get(String(s._id)) ?? 0) + openingShown,
+        name: s.name,
+        phone: s.phone,
+        address: s.address ?? '',
+        status: s.status,
+        startDate: s.startDate,
+        endDate: s.endDate,
+        notes: s.notes,
+      };
+    }),
     meta: buildPageMeta(total, params.page, params.limit),
   };
 }
@@ -443,23 +544,29 @@ export async function listStaff(params: {
 export async function staffSummary(id: string) {
   const staff = await Staff.findById(id).lean();
   if (!staff) throw ApiError.notFound('Staff member not found.', 'STAFF_NOT_FOUND');
-  const rows = await Bill.aggregate<{ total: number }>([
+  const rows = await Bill.aggregate<{ total: number; count: number }>([
     { $match: { staffId: staff._id, isVoided: false } },
-    { $group: { _id: null, total: { $sum: '$duePaisa' } } },
+    { $group: { _id: null, total: { $sum: '$duePaisa' }, count: { $sum: 1 } } },
   ]);
   const khata = await Khata.findById(staff.khataId).select('displayName').lean();
-  const boss = await Boss.findById(staff.bossId).select('name').lean();
+  const boss = staff.bossId ? await Boss.findById(staff.bossId).select('name').lean() : null;
+  const billingResponsibility = staff.billingResponsibility ?? 'OFFICE';
+  const openingShown =
+    billingResponsibility === 'SELF' && (rows[0]?.count ?? 0) === 0
+      ? (staff.openingBalancePaisa ?? 0)
+      : 0;
   return {
     staff: {
       ...staff,
       _id: String(staff._id),
       khataId: String(staff.khataId),
-      bossId: String(staff.bossId),
-      billingResponsibility: staff.billingResponsibility ?? 'OFFICE',
+      bossId: staff.bossId ? String(staff.bossId) : null,
+      billingResponsibility,
+      openingBalancePaisa: staff.openingBalancePaisa ?? 0,
       khataName: khata?.displayName ?? '',
       bossName: boss?.name ?? '',
     },
-    duePaisa: rows[0]?.total ?? 0,
+    duePaisa: (rows[0]?.total ?? 0) + openingShown,
   };
 }
 

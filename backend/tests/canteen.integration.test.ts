@@ -69,7 +69,7 @@ describe('Canteen Khata API — end to end', () => {
     individualKhataId = khata._id;
   });
 
-  it('creates an OFFICE khata with an auto "Office Direct" boss', async () => {
+  it('creates an OFFICE khata with no default boss and its own billing mode', async () => {
     const res = await agent.post('/api/khatas').send({
       type: 'OFFICE',
       displayName: 'Himalaya Hotel',
@@ -79,13 +79,16 @@ describe('Canteen Khata API — end to end', () => {
     expect(res.status).toBe(201);
     const result = expectEnvelope(res);
     expect(result.khata.type).toBe('OFFICE');
+    // No hidden "Office Direct" boss is created anymore; the office's own
+    // direct due lives on the khata (billingMode MIXED/DIRECT).
+    expect(result.defaultBossId).toBeNull();
+    expect(result.khata.billingMode).toBe('MIXED');
     officeKhataId = result.khata._id;
 
     const bossesRes = await agent.get(`/api/bosses/offices/${officeKhataId}/bosses`);
     expect(bossesRes.status).toBe(200);
     const bosses = expectEnvelope(bossesRes).bosses;
-    expect(bosses).toHaveLength(1);
-    expect(bosses[0].isDefault).toBe(true);
+    expect(bosses).toHaveLength(0);
   });
 
   it('adds a boss and staff to the office', async () => {
@@ -138,8 +141,10 @@ describe('Canteen Khata API — end to end', () => {
       defaultStaffBillingResponsibility: 'SELF',
       initialBoss: { name: 'Accounts Team' },
       initialStaff: [
-        { name: 'Personally Billed Staff' },
-        { name: 'Office Billed Staff', billingResponsibility: 'OFFICE' },
+        // bossIndex is explicit now: staff without one join the office pool
+        // (bossId null) instead of silently landing under the first boss.
+        { name: 'Personally Billed Staff', bossIndex: 0 },
+        { name: 'Office Billed Staff', billingResponsibility: 'OFFICE', bossIndex: 0 },
       ],
     });
     expect(officeRes.status).toBe(201);
@@ -457,7 +462,9 @@ describe('Canteen Khata API — end to end', () => {
     expect(officeSearch.body.data.customers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          consumerType: 'BOSS',
+          // A MIXED office's own ledger is offered directly as a payer —
+          // no hidden "Office Direct" boss needs to exist for that.
+          consumerType: 'OFFICE',
           consumerId: expect.any(String),
           name: 'Himalaya Hotel',
           isOfficeDirect: true,

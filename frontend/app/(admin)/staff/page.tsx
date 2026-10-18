@@ -18,7 +18,7 @@ import { useDebounced } from '../../../hooks/useDebounce';
 import { khataService } from '../../../lib/services/khataService';
 import { ApiError } from '../../../lib/apiClient';
 import { formatDate } from '../../../utils/date';
-import { formatNPR } from '../../../utils/money';
+import { formatNPR, rupeesToPaisa } from '../../../utils/money';
 
 export default function StaffPage() {
   const toast = useToast();
@@ -27,6 +27,7 @@ export default function StaffPage() {
   const [khataId, setKhataId] = useState('');
   const [status, setStatus] = useState('');
   const [addOpen, setAddOpen] = useState(false);
+  const [transferStaff, setTransferStaff] = useState<{ _id: string; name: string; khataId: string } | null>(null);
 
   const khatas = useAsync((signal) => khataService.listAll({}, signal), []);
 
@@ -102,7 +103,9 @@ export default function StaffPage() {
                       <Link href={`/offices/${s.bossId}`} className="text-brand-700 hover:underline">
                         {s.bossName ?? s.bossId}
                       </Link>
-                    ) : '—'}
+                    ) : (
+                      <Badge tone="gray">Office pool</Badge>
+                    )}
                   </Td>
                   <Td>{s.billingResponsibility === 'SELF' ? 'Staff pays' : 'Office pays'}</Td>
                   <Td align="right">{s.billingResponsibility === 'SELF' ? formatNPR(s.duePaisa ?? 0) : '—'}</Td>
@@ -138,6 +141,13 @@ export default function StaffPage() {
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => setTransferStaff({ _id: s._id, name: s.name, khataId: s.khataId })}
+                    >
+                      Transfer
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={async () => {
                         try {
                           await khataService.setStaffStatus(s._id, s.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE');
@@ -160,19 +170,101 @@ export default function StaffPage() {
 
       <AddStaffModal
         open={addOpen}
-        khatas={(khatas.data ?? []).filter((k) => k.type === 'OFFICE').map((k) => ({
-          _id: k._id,
-          name: k.displayName,
-          type: k.type,
-          defaultStaffBillingResponsibility: k.defaultStaffBillingResponsibility ?? 'OFFICE',
-        }))}
+        khatas={(khatas.data ?? [])
+          .filter((k) => k.type === 'OFFICE' && (k.billingMode ?? 'MIXED') !== 'DIRECT')
+          .map((k) => ({
+            _id: k._id,
+            name: k.displayName,
+            billingMode: k.billingMode ?? 'MIXED',
+            defaultStaffBillingResponsibility: k.defaultStaffBillingResponsibility ?? 'OFFICE',
+          }))}
         onClose={() => setAddOpen(false)}
         onSaved={() => {
           setAddOpen(false);
           staff.reload();
         }}
       />
+
+      {transferStaff ? (
+        <TransferStaffModal
+          staff={transferStaff}
+          onClose={() => setTransferStaff(null)}
+          onSaved={() => {
+            setTransferStaff(null);
+            staff.reload();
+          }}
+        />
+      ) : null}
     </div>
+  );
+}
+
+function TransferStaffModal({
+  staff,
+  onClose,
+  onSaved,
+}: {
+  staff: { _id: string; name: string; khataId: string };
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const toast = useToast();
+  const [bossId, setBossId] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const detail = useAsync((signal) => khataService.detail(staff.khataId, signal), [staff.khataId]);
+  const bosses = useAsync((signal) => khataService.listBosses(staff.khataId, signal), [staff.khataId]);
+  const billingMode = detail.data?.khata.billingMode ?? 'MIXED';
+
+  async function save() {
+    setSaving(true);
+    setError('');
+    try {
+      await khataService.transferStaff(staff._id, bossId || null);
+      toast.success(
+        bossId
+          ? `${staff.name} transferred. Past bills keep the old boss; new orders bill the new one.`
+          : `${staff.name} moved to the office pool. Past bills keep the old boss.`
+      );
+      onSaved();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not transfer.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal
+      open
+      title={`Transfer ${staff.name}`}
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={save} loading={saving}>Transfer</Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        <Select label="New boss" value={bossId} onChange={(e) => setBossId(e.target.value)}>
+          <option value="">Office pool (no boss — office pays)</option>
+          {(bosses.data ?? []).map((b) => (
+            <option key={b._id} value={b._id}>{b.name}</option>
+          ))}
+        </Select>
+        {billingMode === 'GROUPS' && !bossId ? (
+          <p className="text-xs text-amber-700">
+            This office bills only through bosses — staff in the office pool cannot order until moved to a boss.
+          </p>
+        ) : null}
+        <p className="text-xs text-gray-500">
+          Existing bills and payments keep their original boss. Only future orders use the new assignment.
+        </p>
+      </div>
+      {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
+    </Modal>
   );
 }
 
@@ -183,7 +275,12 @@ function AddStaffModal({
   onSaved,
 }: {
   open: boolean;
-  khatas: Array<{ _id: string; name: string; type: string; defaultStaffBillingResponsibility: 'OFFICE' | 'SELF' }>;
+  khatas: Array<{
+    _id: string;
+    name: string;
+    billingMode: string;
+    defaultStaffBillingResponsibility: 'OFFICE' | 'SELF';
+  }>;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -192,17 +289,20 @@ function AddStaffModal({
   const [bossId, setBossId] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
   const [billingResponsibility, setBillingResponsibility] = useState<'OFFICE' | 'SELF'>('OFFICE');
+  const [openingBalance, setOpeningBalance] = useState('0');
   const [startDate, setStartDate] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const selected = khatas.find((k) => k._id === khataId);
+  const isGroups = selected?.billingMode === 'GROUPS';
   const bosses = useAsync(
     (signal) => khataService.listBosses(khataId, signal),
     [khataId],
-    { enabled: Boolean(khataId) && selected?.type === 'OFFICE' }
+    { enabled: Boolean(khataId) }
   );
 
   async function save() {
@@ -214,6 +314,10 @@ function AddStaffModal({
       setError('A name is required.');
       return;
     }
+    if (isGroups && !bossId) {
+      setError('A GROUPS office bills only through its bosses — pick a boss for this staff member.');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -222,7 +326,10 @@ function AddStaffModal({
         bossId: bossId || undefined,
         name: name.trim(),
         billingResponsibility,
+        openingBalancePaisa:
+          billingResponsibility === 'SELF' ? rupeesToPaisa(Number(openingBalance) || 0) : 0,
         phone: phone.trim() || undefined,
+        address: address.trim() || undefined,
         startDate: startDate || undefined,
         notes: notes.trim() || undefined,
       });
@@ -263,13 +370,20 @@ function AddStaffModal({
         >
           <option value="">Select a khata…</option>
           {khatas.map((k) => (
-            <option key={k._id} value={k._id}>{k.name} ({k.type})</option>
+            <option key={k._id} value={k._id}>{k.name}</option>
           ))}
         </Select>
 
-        {selected?.type === 'OFFICE' ? (
-          <Select label="Boss" value={bossId} onChange={(e) => setBossId(e.target.value)}>
-            <option value="">No boss (office-level)</option>
+        {selected ? (
+          <Select
+            label="Boss"
+            required={isGroups}
+            value={bossId}
+            onChange={(e) => setBossId(e.target.value)}
+          >
+            <option value="">
+              {isGroups ? 'Pick a boss…' : 'Office pool (no boss — office pays)'}
+            </option>
             {(bosses.data ?? []).map((b) => (
               <option key={b._id} value={b._id}>{b.name}</option>
             ))}
@@ -287,6 +401,20 @@ function AddStaffModal({
 
         <Input label="Name" required value={name} onChange={(e) => setName(e.target.value)} />
         <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <Input label="Address" value={address} onChange={(e) => setAddress(e.target.value)} />
+        <Input
+          label="Opening balance (NPR)"
+          type="number"
+          step="0.01"
+          value={openingBalance}
+          onChange={(e) => setOpeningBalance(e.target.value)}
+          disabled={billingResponsibility !== 'SELF'}
+          hint={
+            billingResponsibility === 'SELF'
+              ? 'An existing due, carried into this staff member\u2019s first personal bill.'
+              : 'Only applies when the staff member pays personally.'
+          }
+        />
         <Input label="Start date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
         <Textarea label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>

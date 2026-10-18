@@ -14,6 +14,7 @@ import { nextKhataCode } from './counter.service';
 import { writeAuditLog } from './audit.service';
 import { periodContaining } from './period.service';
 import { countStaffByBoss, setAllStaffByKhata } from './office.service';
+import { assertStaffOpening, unbilledOpeningByKhata } from './opening.service';
 import type { CurrentAdmin } from '../middleware/auth';
 
 export interface CreateKhataInput {
@@ -26,9 +27,20 @@ export interface CreateKhataInput {
   billingStartDay?: number;
   openingBalancePaisa?: number;
   notes?: string;
+  // Office only. DIRECT = office's own ledger; GROUPS = bosses/staff only;
+  // MIXED = both. Defaults to MIXED so every structure stays reachable.
+  billingMode?: 'DIRECT' | 'GROUPS' | 'MIXED';
   defaultStaffBillingResponsibility?: 'OFFICE' | 'SELF';
-  initialBoss?: { name: string; phone?: string };
-  initialStaff?: Array<{ name: string; phone?: string; billingResponsibility?: 'OFFICE' | 'SELF' }>;
+  initialBoss?: { name: string; phone?: string; address?: string; openingBalancePaisa?: number };
+  initialBosses?: Array<{ name: string; phone?: string; address?: string; openingBalancePaisa?: number }>;
+  initialStaff?: Array<{
+    name: string;
+    phone?: string;
+    address?: string;
+    billingResponsibility?: 'OFFICE' | 'SELF';
+    bossIndex?: number;
+    openingBalancePaisa?: number;
+  }>;
 }
 
 export interface UpdateKhataInput {
@@ -37,6 +49,7 @@ export interface UpdateKhataInput {
   address?: string;
   startDate?: string;
   billingStartDay?: number;
+  billingMode?: 'DIRECT' | 'GROUPS' | 'MIXED';
   openingBalancePaisa?: number;
   notes?: string;
 }
@@ -52,6 +65,7 @@ export interface KhataWithDue {
   startDate: string;
   endDate: string | null;
   billingStartDay: number;
+  billingMode: 'DIRECT' | 'GROUPS' | 'MIXED' | null;
   defaultStaffBillingResponsibility: 'OFFICE' | 'SELF';
   openingBalancePaisa: number;
   notes: string;
@@ -78,6 +92,20 @@ export async function createKhata(input: CreateKhataInput, admin: CurrentAdmin) 
     throw ApiError.validation('startDate must be a valid date in YYYY-MM-DD format.');
   }
 
+  const bossSpecs = [
+    ...(input.initialBoss ? [input.initialBoss] : []),
+    ...(input.initialBosses ?? []),
+  ];
+  if (input.type === 'OFFICE') {
+    const mode = input.billingMode ?? 'MIXED';
+    if (mode === 'DIRECT' && (bossSpecs.length > 0 || (input.initialStaff?.length ?? 0) > 0)) {
+      throw ApiError.validation('A DIRECT office bills only the office itself and cannot create bosses or staff.');
+    }
+    if (mode === 'GROUPS' && (input.openingBalancePaisa ?? 0) > 0) {
+      throw ApiError.validation('A GROUPS office has no ledger of its own — put the old dues on a boss instead.');
+    }
+  }
+
   const session = await runInTransaction(async (s) => {
     const khataCode = await nextKhataCode();
     const searchName = normalizeSearch(input.displayName);
@@ -96,6 +124,10 @@ export async function createKhata(input: CreateKhataInput, admin: CurrentAdmin) 
           defaultStaffBillingResponsibility: input.type === 'OFFICE'
             ? input.defaultStaffBillingResponsibility ?? 'OFFICE'
             : undefined,
+          // Offices: the office's OWN opening lives on the khata now (only
+          // billed when billingMode is DIRECT or MIXED — GROUPS rejects a
+          // non-zero value above). No hidden "Office Direct" boss carries it.
+          billingMode: input.type === 'OFFICE' ? input.billingMode ?? 'MIXED' : undefined,
           openingBalancePaisa: input.openingBalancePaisa ?? 0,
           notes: input.notes ?? '',
           createdBy: admin.adminId ? new mongoose.Types.ObjectId(admin.adminId) : null,
@@ -104,32 +136,20 @@ export async function createKhata(input: CreateKhataInput, admin: CurrentAdmin) 
       { session: s ?? undefined }
     );
 
-    let defaultBossId: string | null = null;
     if (input.type === 'OFFICE') {
-      const [boss] = await Boss.create(
-        [
-          {
-            khataId: khata._id,
-            name: 'Office Direct',
-            searchName: 'office direct',
-            isDefault: true,
-            status: 'ACTIVE',
-            startDate: input.startDate,
-          },
-        ],
-        { session: s ?? undefined }
-      );
-      defaultBossId = String(boss._id);
-
-      let staffBossId = defaultBossId;
-      if (input.initialBoss) {
-        const [initialBoss] = await Boss.create(
+      // Create every named boss the caller asked for (legacy single
+      // `initialBoss` is treated as the first entry of `initialBosses`).
+      const namedBossIds: string[] = [];
+      for (const spec of bossSpecs) {
+        const [namedBoss] = await Boss.create(
           [
             {
               khataId: khata._id,
-              name: input.initialBoss.name.trim(),
-              searchName: normalizeSearch(input.initialBoss.name),
-              phone: input.initialBoss.phone ?? '',
+              name: spec.name.trim(),
+              searchName: normalizeSearch(spec.name),
+              phone: spec.phone ?? '',
+              address: spec.address ?? '',
+              openingBalancePaisa: spec.openingBalancePaisa ?? 0,
               isDefault: false,
               status: 'ACTIVE',
               startDate: input.startDate,
@@ -137,21 +157,34 @@ export async function createKhata(input: CreateKhataInput, admin: CurrentAdmin) 
           ],
           { session: s ?? undefined }
         );
-        staffBossId = String(initialBoss._id);
+        namedBossIds.push(String(namedBoss._id));
       }
 
       for (const person of input.initialStaff ?? []) {
+        assertStaffOpening(
+          person.billingResponsibility ?? input.defaultStaffBillingResponsibility ?? 'OFFICE',
+          person.openingBalancePaisa ?? 0
+        );
+        // No boss index resolved = office pool (bossId null, valid in MIXED).
+        // In GROUPS mode a staff member must sit under a boss, so a missing
+        // index is an error rather than a silent office-pool assignment.
+        const bossId = person.bossIndex !== undefined ? (namedBossIds[person.bossIndex] ?? null) : null;
+        if (!bossId && (input.billingMode ?? 'MIXED') === 'GROUPS') {
+          throw ApiError.validation('Every staff member of a GROUPS office must belong to a boss (bossIndex out of range).');
+        }
         await Staff.create(
           [
             {
               khataId: khata._id,
-              bossId: staffBossId,
+              bossId,
               name: person.name.trim(),
               searchName: normalizeSearch(person.name),
               phone: person.phone ?? '',
+              address: person.address ?? '',
               billingResponsibility: person.billingResponsibility
                 ?? input.defaultStaffBillingResponsibility
                 ?? 'OFFICE',
+              openingBalancePaisa: person.openingBalancePaisa ?? 0,
               status: 'ACTIVE',
               startDate: input.startDate,
             },
@@ -170,10 +203,13 @@ export async function createKhata(input: CreateKhataInput, admin: CurrentAdmin) 
       after: { type: input.type, displayName: khata.displayName, khataCode },
     });
 
-    return { khata, defaultBossId };
+    // `defaultBossId` is always null now (no hidden default boss is created),
+    // but the field is kept in the response shape so existing clients don't
+    // break while they migrate to billingMode.
+    return { khata, defaultBossId: null as string | null };
   });
 
-  return { ...session, duePaisa: session.khata.openingBalancePaisa };
+  return { ...session, duePaisa: await getCurrentDue(String(session.khata._id)) };
 }
 
 export async function listKhatas(params: {
@@ -200,7 +236,8 @@ export async function listKhatas(params: {
     Khata.countDocuments(filter),
   ]);
 
-  const dues = await dueByKhata(khatas.map((k) => String(k._id)));
+  const ids = khatas.map((k) => String(k._id));
+  const [dues, openings] = await Promise.all([dueByKhata(ids), unbilledOpeningByKhata(ids)]);
 
   const rows: KhataWithDue[] = khatas.map((k) => ({
     _id: String(k._id),
@@ -213,12 +250,13 @@ export async function listKhatas(params: {
     startDate: k.startDate,
     endDate: k.endDate ?? null,
     billingStartDay: k.billingStartDay,
+    billingMode: k.type === 'OFFICE' ? k.billingMode ?? 'MIXED' : null,
     defaultStaffBillingResponsibility: k.defaultStaffBillingResponsibility ?? 'OFFICE',
     openingBalancePaisa: k.openingBalancePaisa,
     notes: k.notes,
     createdAt: k.createdAt,
     updatedAt: k.updatedAt,
-    duePaisa: (dues.get(String(k._id)) ?? 0) + k.openingBalancePaisa,
+    duePaisa: (dues.get(String(k._id)) ?? 0) + (openings.get(String(k._id)) ?? 0),
   }));
 
   return { rows, meta: buildPageMeta(total, params.page, params.limit) };
@@ -235,26 +273,42 @@ export async function getKhataDetail(id: string) {
     khata.endDate ?? null
   );
 
-  let bosses: Array<{ _id: string; name: string; isDefault: boolean; status: string; duePaisa: number; staffCount: number }> = [];
+  let bosses: Array<{ _id: string; name: string; phone: string; address: string; openingBalancePaisa: number; isDefault: boolean; status: string; duePaisa: number; staffCount: number }> = [];
   if (khata.type === 'OFFICE') {
     const bossDocs = await Boss.find({ khataId: khata._id }).lean();
     const bossIds = bossDocs.map((b) => String(b._id));
-    const [bossDues, staffCounts] = await Promise.all([
+    const [bossDues, staffCounts, bossBillCounts] = await Promise.all([
       getBossDueMap(bossIds),
       countStaffByBoss(bossIds),
+      bossBillCountMap(bossIds),
     ]);
-    bosses = bossDocs.map((b) => ({
-      _id: String(b._id),
-      name: b.name,
-      isDefault: b.isDefault,
-      status: b.status,
-      duePaisa: bossDues.get(String(b._id)) ?? 0,
-      staffCount: staffCounts.get(String(b._id)) ?? 0,
-    }));
+    bosses = bossDocs.map((b) => {
+      const id = String(b._id);
+      // Boss opening shows as due only until their first group bill exists.
+      const openingShown = (bossBillCounts.get(id) ?? 0) === 0 ? (b.openingBalancePaisa ?? 0) : 0;
+      return {
+        _id: id,
+        name: b.name,
+        phone: b.phone,
+        address: b.address ?? '',
+        openingBalancePaisa: b.openingBalancePaisa ?? 0,
+        isDefault: b.isDefault,
+        status: b.status,
+        duePaisa: (bossDues.get(id) ?? 0) + openingShown,
+        staffCount: staffCounts.get(id) ?? 0,
+      };
+    });
   }
 
+  // An office's own opening lives on the khata itself now. Legacy offices
+  // created before billingMode existed may still carry it on an old default
+  // "Office Direct" boss — surface that value until the migration moves it.
+  const openingBalancePaisa = khata.type === 'OFFICE' && (khata.openingBalancePaisa ?? 0) === 0
+    ? bosses.find((b) => b.isDefault)?.openingBalancePaisa ?? 0
+    : khata.openingBalancePaisa;
+
   return {
-    khata: { ...khata, _id: String(khata._id) },
+    khata: { ...khata, _id: String(khata._id), openingBalancePaisa },
     duePaisa: due,
     currentPeriod,
     bosses,
@@ -274,16 +328,27 @@ export async function getBossDueMap(bossIds: string[]): Promise<Map<string, numb
   return map;
 }
 
+async function bossBillCountMap(bossIds: string[]): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (bossIds.length === 0) return map;
+  const rows = await Bill.aggregate<{ _id: mongoose.Types.ObjectId; count: number }>([
+    { $match: { bossId: { $in: bossIds.map((id) => new mongoose.Types.ObjectId(id)) }, staffId: null, isVoided: false } },
+    { $group: { _id: '$bossId', count: { $sum: 1 } } },
+  ]);
+  for (const row of rows) map.set(String(row._id), row.count);
+  return map;
+}
+
 export async function getCurrentDue(khataId: string): Promise<number> {
-  const [rows, khata] = await Promise.all([
+  const [rows, openings] = await Promise.all([
     Bill.aggregate<{ total: number }>([
       { $match: { khataId: new mongoose.Types.ObjectId(khataId), isVoided: false } },
       { $group: { _id: null, total: { $sum: '$duePaisa' } } },
     ]),
-    Khata.findById(khataId).select('openingBalancePaisa').lean(),
+    unbilledOpeningByKhata([khataId]),
   ]);
   const billDue = rows[0]?.total ?? 0;
-  return billDue + (khata?.openingBalancePaisa ?? 0);
+  return billDue + (openings.get(khataId) ?? 0);
 }
 
 /**
@@ -301,7 +366,7 @@ export async function khataSummary(id: string, from?: string, to?: string) {
   const khataId = new mongoose.Types.ObjectId(String(khata._id));
   const range = { $gte: from ?? khata.startDate, $lte: to ?? todayBusinessDate() };
 
-  const [salesAgg, billAgg, paymentAgg, staffCount] = await Promise.all([
+  const [salesAgg, billAgg, paymentAgg, staffCount, openings] = await Promise.all([
     // Accrual sales: the read model, not the event log, so same-day duplicates
     // collapse into one figure per item.
     DailyConsumption.aggregate<{ total: number }>([
@@ -334,6 +399,7 @@ export async function khataSummary(id: string, from?: string, to?: string) {
     // Expenses are canteen-wide, not khata-scoped (PLAN §4), so this summary
     // deliberately has no expense figure rather than a fabricated one.
     khata.type === 'OFFICE' ? Staff.countDocuments({ khataId }) : Promise.resolve(0),
+    unbilledOpeningByKhata([khataId]),
   ]);
 
   const sales = salesAgg[0]?.total ?? 0;
@@ -343,8 +409,8 @@ export async function khataSummary(id: string, from?: string, to?: string) {
   const digital = pay?.digital ?? 0;
   const other = pay?.other ?? 0;
 
-  // Bill dues plus the migrated paper balance that never became a bill line.
-  const outstanding = (bills?.due ?? 0) + khata.openingBalancePaisa;
+  // Bill dues plus migrated paper balances not yet carried onto a bill.
+  const outstanding = (bills?.due ?? 0) + (openings.get(String(khata._id)) ?? 0);
 
   return {
     khataId: String(khata._id),
@@ -378,6 +444,7 @@ export async function updateKhata(id: string, input: UpdateKhataInput, admin: Cu
     address: khata.address,
     startDate: khata.startDate,
     billingStartDay: khata.billingStartDay,
+    billingMode: khata.billingMode ?? null,
     openingBalancePaisa: khata.openingBalancePaisa,
     notes: khata.notes,
   };
@@ -390,7 +457,42 @@ export async function updateKhata(id: string, input: UpdateKhataInput, admin: Cu
     khata.startDate = input.startDate;
   }
   if (input.billingStartDay !== undefined) khata.billingStartDay = input.billingStartDay;
-  if (input.openingBalancePaisa !== undefined) khata.openingBalancePaisa = input.openingBalancePaisa;
+  if (input.billingMode !== undefined) {
+    if (khata.type !== 'OFFICE') throw ApiError.validation('billingMode only applies to office khatas.');
+    if (input.billingMode === khata.billingMode) {
+      // no-op
+    } else if (input.billingMode === 'DIRECT') {
+      const [bossCount, staffCount] = await Promise.all([
+        Boss.countDocuments({ khataId: khata._id }),
+        Staff.countDocuments({ khataId: khata._id }),
+      ]);
+      if (bossCount > 0 || staffCount > 0) {
+        throw ApiError.validation('Cannot switch to DIRECT: this office still has bosses or staff. Remove them first.');
+      }
+    } else if (input.billingMode === 'GROUPS' && (input.openingBalancePaisa ?? khata.openingBalancePaisa ?? 0) > 0) {
+      throw ApiError.validation('Cannot switch to GROUPS while the office itself carries an opening balance.');
+    }
+    khata.billingMode = input.billingMode;
+  }
+  if (input.openingBalancePaisa !== undefined) {
+    if (khata.type === 'OFFICE') {
+      // Legacy offices (no billingMode yet, pre-migration) may still store
+      // the opening on an old default "Office Direct" boss — keep writing
+      // there until the migration moves it to the khata.
+      const legacyDefault = await Boss.findOne({ khataId: khata._id, isDefault: true });
+      if (legacyDefault) {
+        legacyDefault.openingBalancePaisa = input.openingBalancePaisa;
+        await legacyDefault.save();
+      } else {
+        if (input.openingBalancePaisa > 0 && (khata.billingMode ?? 'MIXED') === 'GROUPS') {
+          throw ApiError.validation('A GROUPS office has no ledger of its own — put the dues on a boss instead.');
+        }
+        khata.openingBalancePaisa = input.openingBalancePaisa;
+      }
+    } else {
+      khata.openingBalancePaisa = input.openingBalancePaisa;
+    }
+  }
   if (input.notes !== undefined) khata.notes = input.notes;
 
   khata.searchName = normalizeSearch(khata.displayName);
@@ -409,6 +511,7 @@ export async function updateKhata(id: string, input: UpdateKhataInput, admin: Cu
       address: khata.address,
       startDate: khata.startDate,
       billingStartDay: khata.billingStartDay,
+      billingMode: khata.billingMode ?? null,
       openingBalancePaisa: khata.openingBalancePaisa,
       notes: khata.notes,
     },

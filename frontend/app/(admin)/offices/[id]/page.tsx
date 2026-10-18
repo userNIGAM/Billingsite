@@ -17,7 +17,7 @@ import { useToast } from '../../../../providers/ToastProvider';
 import { useAsync } from '../../../../hooks/useAsync';
 import { khataService } from '../../../../lib/services/khataService';
 import { ApiError } from '../../../../lib/apiClient';
-import { formatNPR } from '../../../../utils/money';
+import { formatNPR, rupeesToPaisa } from '../../../../utils/money';
 import { formatDate } from '../../../../utils/date';
 
 export default function BossDetailPage() {
@@ -207,7 +207,9 @@ function AddStaffModal({
   const toast = useToast();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
   const [billingResponsibility, setBillingResponsibility] = useState<'OFFICE' | 'SELF'>('OFFICE');
+  const [openingBalance, setOpeningBalance] = useState('0');
   const [startDate, setStartDate] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
@@ -226,13 +228,18 @@ function AddStaffModal({
         bossId,
         name: name.trim(),
         billingResponsibility,
+        openingBalancePaisa:
+          billingResponsibility === 'SELF' ? rupeesToPaisa(Number(openingBalance) || 0) : 0,
         phone: phone.trim() || undefined,
+        address: address.trim() || undefined,
         startDate: startDate || undefined,
         notes: notes.trim() || undefined,
       });
       toast.success('Staff added.');
       setName('');
       setPhone('');
+      setAddress('');
+      setOpeningBalance('0');
       setStartDate('');
       setNotes('');
       onSaved();
@@ -258,6 +265,7 @@ function AddStaffModal({
       <div className="flex flex-col gap-3">
         <Input label="Name" required value={name} onChange={(e) => setName(e.target.value)} />
         <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <Input label="Address" value={address} onChange={(e) => setAddress(e.target.value)} />
         <Select
           label="Who pays for this staff member's orders?"
           value={billingResponsibility}
@@ -266,6 +274,19 @@ function AddStaffModal({
           <option value="OFFICE">Office pays</option>
           <option value="SELF">Staff pays personally; bill shows the office</option>
         </Select>
+        <Input
+          label="Opening balance (NPR)"
+          type="number"
+          step="0.01"
+          value={openingBalance}
+          onChange={(e) => setOpeningBalance(e.target.value)}
+          disabled={billingResponsibility !== 'SELF'}
+          hint={
+            billingResponsibility === 'SELF'
+              ? 'An existing due, carried into this staff member\u2019s first personal bill.'
+              : 'Only applies when the staff member pays personally.'
+          }
+        />
         <Input label="Start date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
         <Textarea label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>

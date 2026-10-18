@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { Card, CardBody } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
@@ -16,7 +16,7 @@ import { Pagination } from '../../../components/ui/Pagination';
 import { useToast } from '../../../providers/ToastProvider';
 import { useAsync } from '../../../hooks/useAsync';
 import { khataService } from '../../../lib/services/khataService';
-import { paymentService } from '../../../lib/services/operationService';
+import { billService, paymentService } from '../../../lib/services/operationService';
 import { ApiError } from '../../../lib/apiClient';
 import type { DigitalChannel, Payment, PaymentMethod } from '../../../types/api';
 import { formatNPR, rupeesToPaisa } from '../../../utils/money';
@@ -137,7 +137,12 @@ function PaymentsView() {
 
       <RecordPaymentModal
         open={recordOpen}
-        khatas={(khatas.data ?? []).map((k) => ({ _id: k._id, name: k.displayName, type: k.type }))}
+        khatas={(khatas.data ?? []).map((k) => ({
+          _id: k._id,
+          name: k.displayName,
+          type: k.type,
+          billingMode: k.billingMode ?? null,
+        }))}
         onClose={() => setRecordOpen(false)}
         onSaved={() => {
           setRecordOpen(false);
@@ -164,7 +169,7 @@ function RecordPaymentModal({
   onSaved,
 }: {
   open: boolean;
-  khatas: Array<{ _id: string; name: string; type: string }>;
+  khatas: Array<{ _id: string; name: string; type: string; billingMode: string | null }>;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -181,21 +186,44 @@ function RecordPaymentModal({
   const [error, setError] = useState('');
 
   const selected = khatas.find((k) => k._id === khataId);
+  const selectedBillingMode = selected?.billingMode ?? (selected?.type === 'OFFICE' ? 'MIXED' : null);
+  const officeHasOwnLedger = selectedBillingMode === 'DIRECT' || selectedBillingMode === 'MIXED';
+  const fetchOfficeGroups = Boolean(khataId) && selected?.type === 'OFFICE' && selectedBillingMode !== 'DIRECT';
   const bosses = useAsync(
     (signal) => khataService.listBosses(khataId, signal),
     [khataId],
-    { enabled: Boolean(khataId) && selected?.type === 'OFFICE' }
+    { enabled: fetchOfficeGroups }
   );
   const staff = useAsync(
     (signal) => khataService.listStaff({ khataId, status: 'ACTIVE' }, signal),
     [khataId],
-    { enabled: Boolean(khataId) && selected?.type === 'OFFICE' }
+    { enabled: fetchOfficeGroups }
   );
   const selfPayingStaff = (staff.data ?? []).filter((person) => person.billingResponsibility === 'SELF');
+
+  // A DIRECT office pays only through its own ledger — preselect that payer.
+  useEffect(() => {
+    if (selected?.type === 'OFFICE' && selectedBillingMode === 'DIRECT') {
+      setOfficePayer('office');
+    }
+  }, [selected?.type, selectedBillingMode]);
+
   const balance = useAsync(
     (signal) => {
       if (!khataId || !selected) return Promise.resolve(0);
       if (selected.type === 'OFFICE') {
+        if (officePayer === 'office') {
+          // Office ledger = bills scoped OFFICE + office opening balance.
+          return billService
+            .list({ khataId, page: 1, limit: 100 }, signal)
+            .then(async (bills) => {
+              const officeDue = bills.rows
+                .filter((b) => b.scope === 'OFFICE' && !b.isVoided)
+                .reduce((sum, b) => sum + b.duePaisa, 0);
+              const khata = await khataService.detail(khataId, signal);
+              return officeDue + (khata.khata.openingBalancePaisa ?? 0);
+            });
+        }
         if (officePayer.startsWith('staff:')) {
           return khataService.staffSummary(officePayer.slice(6), signal).then((summary) => summary.duePaisa);
         }
@@ -213,7 +241,7 @@ function RecordPaymentModal({
   async function save() {
     if (!khataId) { setError('Choose a khata.'); return; }
     if (selected?.type === 'OFFICE' && !officePayer) {
-      setError('Choose an office group or a self-paying staff member.');
+      setError('Choose who is paying — the office, a boss, or a self-paying staff member.');
       return;
     }
     const amountPaisa = rupeesToPaisa(Number(amount));
@@ -221,11 +249,12 @@ function RecordPaymentModal({
     setSaving(true);
     setError('');
     try {
+      // officePayer === 'office' pays the office's own ledger (bossId and staffId null).
       const payment = await paymentService.record({
         khataId,
         bossId: officePayer.startsWith('boss:') ? officePayer.slice(5)
           : (officePayer.startsWith('staff:')
-            ? selfPayingStaff.find((person) => person._id === officePayer.slice(6))?.bossId
+            ? selfPayingStaff.find((person) => person._id === officePayer.slice(6))?.bossId ?? null
             : null),
         staffId: officePayer.startsWith('staff:') ? officePayer.slice(6) : null,
         amountPaisa,
@@ -238,12 +267,17 @@ function RecordPaymentModal({
       const appliedPaisa = payment.allocations.reduce((sum, allocation) => sum + allocation.amountPaisa, 0);
       let remainingDueText = '';
       try {
-        const remainingDuePaisa = selected?.type === 'OFFICE'
-          ? officePayer.startsWith('staff:')
-            ? (await khataService.staffSummary(officePayer.slice(6))).duePaisa
-            : (await khataService.bossSummary(officePayer.slice(5))).duePaisa
-          : (await khataService.summary(khataId)).bills.outstandingPaisa;
-        remainingDueText = ` Remaining bill due: ${formatNPR(remainingDuePaisa)}.`;
+        if (selected?.type === 'OFFICE' && officePayer === 'office') {
+          // balance.data was fetched pre-payment.
+          remainingDueText = ` Remaining bill due: ${formatNPR(Math.max(0, (balance.data ?? 0) - amountPaisa))}.`;
+        } else {
+          const remainingDuePaisa = selected?.type === 'OFFICE'
+            ? officePayer.startsWith('staff:')
+              ? (await khataService.staffSummary(officePayer.slice(6))).duePaisa
+              : (await khataService.bossSummary(officePayer.slice(5))).duePaisa
+            : (await khataService.summary(khataId)).bills.outstandingPaisa;
+          remainingDueText = ` Remaining bill due: ${formatNPR(remainingDuePaisa)}.`;
+        }
       } catch {
         remainingDueText = ' Payment saved; balance could not be refreshed.';
       }
@@ -278,16 +312,25 @@ function RecordPaymentModal({
 
         {selected?.type === 'OFFICE' ? (
           <Select label="Payment for" required value={officePayer} onChange={(e) => setOfficePayer(e.target.value)}>
-            <option value="">Choose office group or staff…</option>
-            <optgroup label="Office-paid groups">
-              {(bosses.data ?? []).map((b) => (
-                <option key={b._id} value={`boss:${b._id}`}>{b.name}</option>
-              ))}
-            </optgroup>
+            <option value="">Choose who is paying…</option>
+            {officeHasOwnLedger ? (
+              <optgroup label="Office itself">
+                <option value="office">{selected.name} — office ledger</option>
+              </optgroup>
+            ) : null}
+            {(bosses.data ?? []).length > 0 && (
+              <optgroup label="Bosses">
+                {(bosses.data ?? []).map((b) => (
+                  <option key={b._id} value={`boss:${b._id}`}>{b.name}</option>
+                ))}
+              </optgroup>
+            )}
             {selfPayingStaff.length > 0 && (
               <optgroup label="Staff paying personally">
                 {selfPayingStaff.map((person) => (
-                  <option key={person._id} value={`staff:${person._id}`}>{person.name} — {person.bossName}</option>
+                  <option key={person._id} value={`staff:${person._id}`}>
+                    {person.name}{person.bossName ? ` — ${person.bossName}` : ' — office pool'}
+                  </option>
                 ))}
               </optgroup>
             )}

@@ -1,13 +1,13 @@
 import request from "supertest";
-import { createApp } from "../app.js";
-import { Bill } from "../models/bill.model.js";
-import { Payment } from "../models/payment.model.js";
-import { ConsumptionTransaction } from "../models/consumptionTransaction.model.js";
-import { DailyConsumption } from "../models/dailyConsumption.model.js";
-import { Boss } from "../models/boss.model.js";
-import { Khata } from "../models/khata.model.js";
-import { periodContaining } from "../services/period.service.js";
-import { runInTransaction } from "../utils/transaction.js";
+import { createApp } from "../app";
+import { Bill } from "../models/bill.model";
+import { Payment } from "../models/payment.model";
+import { ConsumptionTransaction } from "../models/consumptionTransaction.model";
+import { DailyConsumption } from "../models/dailyConsumption.model";
+import { Boss } from "../models/boss.model";
+import { Khata } from "../models/khata.model";
+import { periodContaining } from "../services/period.service";
+import { runInTransaction } from "../utils/transaction";
 
 /**
  * Regression tests for defects found while bringing the integration suite
@@ -192,6 +192,11 @@ describe("regressions", () => {
       expect(firstBill.previousDuePaisa).toBe(5000);
       expect(firstBill.totalPayablePaisa).toBe(17000);
 
+      // The opening now lives inside the first bill, so the khata's due must
+      // not add it a second time on top of the bill dues.
+      const detail = await agent.get(`/api/khatas/${freshKhataId}`);
+      expect(detail.body.data.duePaisa).toBe(17000);
+
       await agent.post("/api/consumption").send({
         consumerType: "INDIVIDUAL",
         consumerId: freshKhataId,
@@ -209,7 +214,7 @@ describe("regressions", () => {
       expect(second.body.data.bill.previousDuePaisa).toBe(17000);
     });
 
-    it("does not fold an office opening balance into an arbitrary boss bill", async () => {
+    it("keeps an office opening balance on the office ledger and off every boss bill", async () => {
       const office = await agent.post("/api/khatas").send({
         type: "OFFICE",
         displayName: "Opening Balance Office",
@@ -218,6 +223,13 @@ describe("regressions", () => {
         openingBalancePaisa: 9000,
       });
       const officeId = office.body.data.khata._id;
+      // The office's own opening lives on the khata itself now — no hidden
+      // "Office Direct" boss carries it.
+      expect(office.body.data.khata.openingBalancePaisa).toBe(9000);
+      expect(office.body.data.defaultBossId).toBeNull();
+      const officeDetail = await agent.get(`/api/khatas/${officeId}`);
+      expect(officeDetail.body.data.duePaisa).toBe(9000);
+      expect(officeDetail.body.data.bosses).toHaveLength(0);
 
       const bossRes = await agent
         .post(`/api/bosses/offices/${officeId}/bosses`)
@@ -243,9 +255,160 @@ describe("regressions", () => {
         periodEnd: "2026-01-31",
       });
       expect(res.status).toBe(201);
-      // Office dues already include openingBalancePaisa at the khata level, so
-      // billing it on top of one boss's invoice would double-count it.
+      // The office ledger's opening stays on the office: folding it into one
+      // boss's invoice would double-count it against the office total.
       expect(res.body.data.bill.previousDuePaisa).toBe(0);
+    });
+  });
+
+  describe("office setup with named bosses and staff opening balances", () => {
+    it("creates multiple named bosses, assigns staff by bossIndex, and carries a self-billed staff opening balance onto their first bill exactly once", async () => {
+      const office = await agent.post("/api/khatas").send({
+        type: "OFFICE",
+        displayName: "Multi Boss Office",
+        startDate: "2026-01-01",
+        billingStartDay: 1,
+        initialBosses: [{ name: "Hari Bahadur" }, { name: "Gita Devi" }],
+        initialStaff: [
+          { name: "Boss One Staff", bossIndex: 0 },
+          { name: "Self Staff", bossIndex: 1, billingResponsibility: "SELF", openingBalancePaisa: 7000 },
+        ],
+      });
+      expect(office.status).toBe(201);
+      const officeId = office.body.data.khata._id as string;
+
+      const bossesRes = await agent.get(`/api/bosses/offices/${officeId}/bosses`);
+      const bosses = bossesRes.body.data.bosses as Array<{ _id: string; name: string; isDefault: boolean }>;
+      // Only the two named bosses — no hidden "Office Direct" fallback.
+      expect(bosses).toHaveLength(2);
+      const hari = bosses.find((b) => b.name === "Hari Bahadur")!;
+      const gita = bosses.find((b) => b.name === "Gita Devi")!;
+      expect(hari).toBeTruthy();
+      expect(gita).toBeTruthy();
+
+      const staffRes = await agent.get(`/api/staff?khataId=${officeId}`);
+      const rows = staffRes.body.data.rows as Array<{
+        _id: string;
+        name: string;
+        bossId: string;
+        billingResponsibility: string;
+        openingBalancePaisa: number;
+        duePaisa: number;
+      }>;
+      const bossOne = rows.find((r) => r.name === "Boss One Staff")!;
+      const selfStaff = rows.find((r) => r.name === "Self Staff")!;
+      expect(bossOne.bossId).toBe(hari._id);
+      expect(selfStaff.bossId).toBe(gita._id);
+      expect(selfStaff.openingBalancePaisa).toBe(7000);
+      // Until the first bill exists the opening balance is the staff's due.
+      expect(selfStaff.duePaisa).toBe(7000);
+
+      const billRes = await agent.post("/api/bills/generate").send({
+        khataId: officeId,
+        staffId: selfStaff._id,
+        periodStart: "2026-01-01",
+        periodEnd: "2026-01-31",
+      });
+      expect(billRes.status).toBe(201);
+      expect(billRes.body.data.bill.previousDuePaisa).toBe(7000);
+      expect(billRes.body.data.bill.duePaisa).toBe(7000);
+
+      // Now that the first bill exists the opening balance lives inside it, so
+      // the staff list must stop adding it again (no double count).
+      const afterRes = await agent.get(`/api/staff?khataId=${officeId}`);
+      const afterRows = afterRes.body.data.rows as Array<{ name: string; duePaisa: number }>;
+      expect(afterRows.find((r) => r.name === "Self Staff")!.duePaisa).toBe(7000);
+    });
+  });
+
+  describe("boss opening balance and address", () => {
+    it("stores boss address + opening balance, shows the opening as due until the first group bill, then carries it exactly once", async () => {
+      const office = await agent.post("/api/khatas").send({
+        type: "OFFICE",
+        displayName: "Boss Opening Office",
+        startDate: "2026-01-01",
+        billingStartDay: 1,
+        initialBosses: [
+          { name: "Ram Bahadur", address: "Baneshwor", openingBalancePaisa: 5000 },
+          { name: "Shyam Kumar", openingBalancePaisa: 3000 },
+        ],
+      });
+      expect(office.status).toBe(201);
+      const officeId = office.body.data.khata._id as string;
+
+      const bossesRes = await agent.get(`/api/bosses/offices/${officeId}/bosses`);
+      const bosses = bossesRes.body.data.bosses as Array<{
+        _id: string;
+        name: string;
+        address: string;
+        openingBalancePaisa: number;
+        duePaisa: number;
+        isDefault: boolean;
+      }>;
+      const ram = bosses.find((b) => b.name === "Ram Bahadur")!;
+      const shyam = bosses.find((b) => b.name === "Shyam Kumar")!;
+      expect(ram.address).toBe("Baneshwor");
+      expect(ram.openingBalancePaisa).toBe(5000);
+      expect(ram.duePaisa).toBe(5000);
+      expect(shyam.duePaisa).toBe(3000);
+      // No hidden default boss exists to absorb dues (there is no default boss
+      // at all), and none of the named bosses' opening leaked into another.
+      expect(bosses.find((b) => b.isDefault)?.duePaisa ?? 0).toBe(0);
+
+      const billRes = await agent.post("/api/bills/generate").send({
+        khataId: officeId,
+        bossId: ram._id,
+        periodStart: "2026-01-01",
+        periodEnd: "2026-01-31",
+      });
+      expect(billRes.status).toBe(201);
+      // Ram's own migrated due lands on his first group bill — and only once.
+      expect(billRes.body.data.bill.previousDuePaisa).toBe(5000);
+      expect(billRes.body.data.bill.duePaisa).toBe(5000);
+
+      // Shyam's opening is untouched by Ram's bill.
+      const afterRes = await agent.get(`/api/bosses/offices/${officeId}/bosses`);
+      const afterBosses = afterRes.body.data.bosses as Array<{ name: string; duePaisa: number }>;
+      expect(afterBosses.find((b) => b.name === "Ram Bahadur")!.duePaisa).toBe(5000);
+      expect(afterBosses.find((b) => b.name === "Shyam Kumar")!.duePaisa).toBe(3000);
+
+      // Editing the boss keeps address + opening balance auditable fields up to date.
+      const updateRes = await agent
+        .patch(`/api/bosses/${ram._id}`)
+        .send({ address: "New Baneshwor", openingBalancePaisa: 6000 });
+      expect(updateRes.status).toBe(200);
+      expect(updateRes.body.data.boss.address).toBe("New Baneshwor");
+      expect(updateRes.body.data.boss.openingBalancePaisa).toBe(6000);
+    });
+
+    it("stores a staff address and keeps it on the staff list and summary", async () => {
+      const office = await agent.post("/api/khatas").send({
+        type: "OFFICE",
+        displayName: "Staff Address Office",
+        startDate: "2026-01-01",
+        billingStartDay: 1,
+      });
+      const officeId = office.body.data.khata._id as string;
+
+      const staffRes = await agent.post("/api/staff").send({
+        khataId: officeId,
+        name: "Addressed Staff",
+        address: "Koteshwor",
+        phone: "9800000000",
+        billingResponsibility: "SELF",
+        openingBalancePaisa: 2000,
+        startDate: "2026-01-01",
+      });
+      expect(staffRes.status).toBe(201);
+      const staffId = staffRes.body.data.staff._id as string;
+
+      const listRes = await agent.get(`/api/staff?khataId=${officeId}`);
+      const row = (listRes.body.data.rows as Array<{ name: string; address: string }>)
+        .find((r) => r.name === "Addressed Staff")!;
+      expect(row.address).toBe("Koteshwor");
+
+      const summaryRes = await agent.get(`/api/staff/${staffId}/summary`);
+      expect(summaryRes.body.data.staff.address).toBe("Koteshwor");
     });
   });
 
@@ -570,14 +733,26 @@ describe("regressions", () => {
       }
     });
 
-    it("keeps the auto-created Office Direct boss searchable", async () => {
+    it("keeps the office itself searchable as an OFFICE consumer (no default boss)", async () => {
       const office = await Khata.findById(officeKhataId).lean();
+      expect(office!.billingMode).toBe("MIXED");
       const defaultBoss = await Boss.findOne({
         khataId: office!._id,
         isDefault: true,
       }).lean();
-      expect(defaultBoss).not.toBeNull();
-      expect(defaultBoss!.searchName).toBe("office direct");
+      expect(defaultBoss).toBeNull();
+
+      const search = await agent.get("/api/customers/search?q=regression office");
+      expect(search.status).toBe(200);
+      expect(search.body.data.customers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            consumerType: "OFFICE",
+            name: "Regression Office",
+            khataId: officeKhataId,
+          }),
+        ]),
+      );
     });
   });
 

@@ -4,6 +4,7 @@ import { Bill } from '../models/bill.model';
 import { Payment } from '../models/payment.model';
 import { Expense } from '../models/expense.model';
 import { Khata } from '../models/khata.model';
+import { unbilledOpeningByKhata } from './opening.service';
 import { businessNow, startOfMonthDate, endOfMonthDate, todayBusinessDate, dateSeries } from '../utils/date';
 
 function monthRange() {
@@ -118,9 +119,7 @@ export async function dashboardSummary() {
       { $match: { isVoided: false } },
       { $group: { _id: null, total: { $sum: '$duePaisa' } } },
     ]),
-    Khata.aggregate<{ total: number }>([
-      { $group: { _id: null, total: { $sum: '$openingBalancePaisa' } } },
-    ]),
+    unbilledOpeningByKhata(),
     Promise.all([
       Khata.countDocuments({ status: 'ACTIVE' }),
       Khata.countDocuments({ type: 'OFFICE', status: 'ACTIVE' }),
@@ -140,7 +139,7 @@ export async function dashboardSummary() {
   ]);
 
   const totalBillDue = totalBillDueRows[0]?.total ?? 0;
-  const totalOpening = totalOpeningRows[0]?.total ?? 0;
+  const totalOpening = [...totalOpeningRows.values()].reduce((sum, v) => sum + v, 0);
   const outstanding = totalBillDue + totalOpening;
 
   const [totalActiveKhatas, activeOffices, activeIndividuals] = khataCounts;
@@ -212,6 +211,7 @@ export async function outstandingRows(): Promise<OutstandingRow[]> {
 
   const billDue = new Map(billAgg.map((r) => [String(r._id), r.due]));
   const lastPay = new Map(lastPayments.map((r) => [String(r._id), r.lastDate as string]));
+  const openings = await unbilledOpeningByKhata();
 
   return khatas
     .map((k) => ({
@@ -219,8 +219,8 @@ export async function outstandingRows(): Promise<OutstandingRow[]> {
       khataName: k.displayName,
       type: k.type,
       status: k.status,
-      openingBalancePaisa: k.openingBalancePaisa,
-      duePaisa: (billDue.get(String(k._id)) ?? 0) + k.openingBalancePaisa,
+      openingBalancePaisa: openings.get(String(k._id)) ?? 0,
+      duePaisa: (billDue.get(String(k._id)) ?? 0) + (openings.get(String(k._id)) ?? 0),
       lastPaymentDate: lastPay.get(String(k._id)) ?? null,
     }))
     .filter((r) => r.duePaisa > 0)

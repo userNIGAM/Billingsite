@@ -35,7 +35,7 @@ interface PayerContext {
   khataId: mongoose.Types.ObjectId;
   bossId: mongoose.Types.ObjectId | null;
   staffId: mongoose.Types.ObjectId | null;
-  scope: 'INDIVIDUAL' | 'BOSS_GROUP' | 'STAFF';
+  scope: 'INDIVIDUAL' | 'BOSS_GROUP' | 'STAFF' | 'OFFICE';
   payerName: string;
   billingStartDay: number;
   khataStartDate: string;
@@ -77,25 +77,47 @@ async function resolvePayerContext(
     }
     return {
       ...base,
-      bossId: staff.bossId,
+      // Null for office-pool staff (no boss) — the staff ledger is keyed on
+      // staffId alone, so a missing boss never merges it into another group.
+      bossId: staff.bossId ?? null,
       staffId: staff._id,
       scope: 'STAFF',
       payerName: `${khata.displayName} — ${staff.name}`,
+      // A staff member's own migrated paper due is carried into their first
+      // personal bill (they are billed directly, like an individual khata).
+      openingBalancePaisa: staff.openingBalancePaisa ?? 0,
     };
   }
 
-  if (!bossId) {
-    throw ApiError.badRequest('BOSS_REQUIRED', 'An office khata needs a boss specified for bill generation.');
+  if (bossId) {
+    const boss = await Boss.findOne({ _id: bossId, khataId: khata._id });
+    if (!boss) throw ApiError.notFound('Boss not found for this office.', 'BOSS_NOT_FOUND');
+    return {
+      ...base,
+      bossId: boss._id,
+      staffId: null,
+      scope: 'BOSS_GROUP',
+      payerName: `${khata.displayName} — ${boss.name}`,
+      // A boss's own migrated paper due is carried into their first group bill.
+      openingBalancePaisa: boss.openingBalancePaisa ?? 0,
+    };
   }
-  const boss = await Boss.findOne({ _id: bossId, khataId: khata._id });
-  if (!boss) throw ApiError.notFound('Boss not found for this office.', 'BOSS_NOT_FOUND');
-  return {
-    ...base,
-    bossId: boss._id,
-    staffId: null,
-    scope: 'BOSS_GROUP',
-    payerName: `${khata.displayName} — ${boss.name}`,
-  };
+
+  // No boss, no staff: the office's OWN ledger (DIRECT/MIXED billing modes).
+  // A GROUPS office has no ledger of its own, so it still needs a boss.
+  if (khata.billingMode === 'DIRECT' || khata.billingMode === 'MIXED') {
+    return {
+      ...base,
+      bossId: null,
+      staffId: null,
+      scope: 'OFFICE',
+      payerName: khata.displayName,
+      // The office ledger's migrated due is carried into its first bill.
+      openingBalancePaisa: khata.openingBalancePaisa ?? 0,
+    };
+  }
+
+  throw ApiError.badRequest('BOSS_REQUIRED', 'An office khata needs a boss specified for bill generation.');
 }
 
 /**
@@ -253,21 +275,20 @@ export async function generateBill(input: GenerateBillInput, admin: CurrentAdmin
   ]);
   const carriedDue = preMaster[0]?.total ?? 0;
 
-  // 2b. Migrated paper dues (`Khata.openingBalancePaisa`) must land on a bill
-  //     or they are uncollectable: payments allocate FIFO across BILLS, so a
-  //     balance that never reaches an invoice stays "outstanding" forever even
-  //     though the khata's due correctly included it.
+  // 2b. Migrated paper dues must land on a bill or they are uncollectable:
+  //     payments allocate FIFO across BILLS, so a balance that never reaches an
+  //     invoice stays "outstanding" forever even though the ledger's due
+  //     correctly included it.
   //
-  //     It is added to the payer's FIRST bill only. Adding it to every bill
-  //     would re-charge the same opening balance each period.
-  //
-  //     Restricted to INDIVIDUAL scope on purpose: for an office the opening
-  //     balance is a khata-level liability, and office dues already include it
-  //     (khata.service listKhatas/getCurrentDue add `openingBalancePaisa`).
-  //     Folding it into one arbitrary boss's bill would double-count it
-  //     against the office total.
+  //     `payer.openingBalancePaisa` is that LEDGER's own opening: the khata's
+  //     for INDIVIDUAL and for the office's own OFFICE ledger, the staff
+  //     member's for STAFF, the boss's for BOSS_GROUP.
+  //     It is added to the payer's FIRST bill only — adding it to every bill
+  //     would re-charge the same opening each period. (Each ledger carries its
+  //     own opening, so folding it into that ledger's bill is not a double
+  //     count against the office total.)
   const isFirstBillForPayer = (preMaster[0]?.count ?? 0) === 0;
-  const openingBalance = payer.scope === 'INDIVIDUAL' && isFirstBillForPayer ? payer.openingBalancePaisa : 0;
+  const openingBalance = isFirstBillForPayer ? payer.openingBalancePaisa : 0;
   const previousDue = carriedDue + openingBalance;
 
   // 3. Available credit from advance/overpayments, oldest first.

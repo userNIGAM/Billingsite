@@ -1,6 +1,7 @@
 import mongoose, { Schema, InferSchemaType } from 'mongoose';
 
-export const CONSUMER_TYPES = ['INDIVIDUAL', 'BOSS', 'STAFF'] as const;
+// OFFICE = the office khata's own direct ledger (4-option system, DIRECT/MIXED).
+export const CONSUMER_TYPES = ['INDIVIDUAL', 'BOSS', 'STAFF', 'OFFICE'] as const;
 export const ENTRY_TYPES = ['ORDER', 'REVERSAL'] as const;
 export const TX_STATUSES = ['ACTIVE', 'VOIDED'] as const;
 

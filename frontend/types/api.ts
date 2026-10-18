@@ -13,12 +13,19 @@ export interface PageMeta {
 
 export type KhataType = 'INDIVIDUAL' | 'OFFICE';
 export type KhataStatus = 'ACTIVE' | 'OFFLINE';
+/**
+ * Office-only. DIRECT = the office itself is the payer (no bosses/staff);
+ * GROUPS = bosses and their staff only (the office has no ledger);
+ * MIXED = office ledger + bosses + staff coexist. Null for individuals and
+ * for offices created before this field existed (treat as MIXED).
+ */
+export type BillingMode = 'DIRECT' | 'GROUPS' | 'MIXED';
 export type BossStatus = 'ACTIVE' | 'INACTIVE';
-export type ConsumerType = 'INDIVIDUAL' | 'BOSS' | 'STAFF';
+export type ConsumerType = 'INDIVIDUAL' | 'BOSS' | 'STAFF' | 'OFFICE';
 export type PaymentMethod = 'CASH' | 'DIGITAL' | 'OTHER';
 export type DigitalChannel = 'ESEWA' | 'KHALTI' | 'BANK' | 'QR' | null;
 export type BillStatus = 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'OVERPAID';
-export type BillScope = 'INDIVIDUAL' | 'BOSS_GROUP' | 'OFFICE';
+export type BillScope = 'INDIVIDUAL' | 'BOSS_GROUP' | 'STAFF' | 'OFFICE';
 export type EntryType = 'ORDER' | 'REVERSAL';
 
 export interface Khata {
@@ -32,6 +39,8 @@ export interface Khata {
   startDate: string;
   endDate: string | null;
   billingStartDay: number;
+  /** Offices only; null for individuals. */
+  billingMode?: BillingMode | null;
   defaultStaffBillingResponsibility?: 'OFFICE' | 'SELF';
   openingBalancePaisa: number;
   notes: string;
@@ -52,6 +61,8 @@ export interface Boss {
   khataId: string;
   name: string;
   phone: string;
+  address: string;
+  openingBalancePaisa: number;
   isDefault: boolean;
   status: BossStatus;
   startDate: string;
@@ -75,10 +86,12 @@ export interface Staff {
   khataId: string;
   bossId: string | null;
   billingResponsibility: 'OFFICE' | 'SELF';
+  openingBalancePaisa: number;
   duePaisa?: number;
   bossName?: string;
   name: string;
   phone: string;
+  address: string;
   status: BossStatus;
   startDate: string;
   endDate: string | null;

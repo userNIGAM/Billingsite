@@ -5,7 +5,7 @@ import { escapeRegex, normalizeSearch } from '../utils/pagination';
 import { ApiError } from '../utils/ApiError';
 import { objectId } from '../validators/common';
 
-export type ConsumerType = 'INDIVIDUAL' | 'BOSS' | 'STAFF';
+export type ConsumerType = 'INDIVIDUAL' | 'BOSS' | 'STAFF' | 'OFFICE';
 
 export interface CustomerSearchResult {
   consumerType: ConsumerType;
@@ -39,13 +39,17 @@ export async function searchCustomers(q: string, includeOffline = false): Promis
       .select('displayName status')
       .limit(20)
       .lean(),
+    // Every office matching the term (any billingMode): the ids also feed the
+    // default-boss lookup below so legacy "Office Direct" bosses stay
+    // searchable, while the OFFICE consumer rows are only emitted for
+    // DIRECT/MIXED ledgers.
     term
-      ? Khata.find<{ _id: unknown }>({
+      ? Khata.find<{ _id: unknown; displayName: string; status: string; billingMode: string | null }>({
           type: 'OFFICE',
           ...(includeOffline ? {} : { status: 'ACTIVE' }),
           searchName: { $regex: safe },
         })
-          .select('_id')
+          .select('displayName status billingMode')
           .limit(20)
           .lean()
       : Promise.resolve([]),
@@ -106,11 +110,17 @@ export async function searchCustomers(q: string, includeOffline = false): Promis
           as: 'boss',
         },
       },
-      { $unwind: { path: '$boss', preserveNullAndEmptyArrays: false } },
+      // Boss-less staff (office pool) must stay searchable — the unwind used
+      // to drop them before they could ever reach the picker.
+      { $unwind: { path: '$boss', preserveNullAndEmptyArrays: true } },
       {
         $match: includeOffline
           ? {}
-          : { 'khata.status': 'ACTIVE', 'boss.status': 'ACTIVE', status: 'ACTIVE' },
+          : {
+              'khata.status': 'ACTIVE',
+              status: 'ACTIVE',
+              $or: [{ boss: { $exists: false } }, { 'boss.status': 'ACTIVE' }],
+            },
       },
       { $limit: 20 },
     ]).then((rows) =>
@@ -118,9 +128,9 @@ export async function searchCustomers(q: string, includeOffline = false): Promis
         _id: r._id,
         name: r.name,
         khataId: r.khataId,
-        bossId: r.bossId,
+        bossId: r.bossId ?? null,
         khataName: r.khata.displayName,
-        bossName: r.boss.name,
+        bossName: r.boss?.name ?? null,
         billingResponsibility: r.billingResponsibility ?? 'OFFICE',
         status: r.status,
       }))
@@ -143,6 +153,23 @@ export async function searchCustomers(q: string, includeOffline = false): Promis
     });
   }
 
+  // The office itself as payer, but only when its own ledger is active
+  // (DIRECT/MIXED). A GROUPS-only office is never offered without a boss.
+  for (const office of offices) {
+    if (office.billingMode !== 'DIRECT' && office.billingMode !== 'MIXED') continue;
+    results.push({
+      consumerType: 'OFFICE',
+      consumerId: String(office._id),
+      name: office.displayName,
+      context: 'Office account',
+      khataId: String(office._id),
+      bossId: null,
+      khataName: office.displayName,
+      isOfficeDirect: true,
+      status: office.status as CustomerSearchResult['status'],
+    });
+  }
+
   for (const boss of bosses) {
     const isOfficeDirect = Boolean(boss.isDefault);
     results.push({
@@ -159,13 +186,14 @@ export async function searchCustomers(q: string, includeOffline = false): Promis
   }
 
   for (const staff of staffs) {
+    const group = staff.bossName ? `Boss: ${staff.bossName}` : 'Office pool';
     results.push({
       consumerType: 'STAFF',
       consumerId: String(staff._id),
       name: String(staff.name),
-      context: `${staff.khataName} • Boss: ${staff.bossName}${staff.billingResponsibility === 'SELF' ? ' • Pays personally' : ''}`,
+      context: `${staff.khataName} • ${group}${staff.billingResponsibility === 'SELF' ? ' • Pays personally' : ''}`,
       khataId: String(staff.khataId),
-      bossId: String(staff.bossId),
+      bossId: staff.bossId ? String(staff.bossId) : null,
       khataName: String(staff.khataName),
       isOfficeDirect: false,
       billingResponsibility: staff.billingResponsibility as 'OFFICE' | 'SELF',
@@ -208,6 +236,30 @@ export async function resolveConsumer(consumerType: ConsumerType, consumerId: st
     };
   }
 
+  if (consumerType === 'OFFICE') {
+    // The office khata's own direct ledger (DIRECT/MIXED). Payer key is
+    // (khataId, null, null) — same shape as an individual, scope OFFICE.
+    const khata = await Khata.findById(consumerId);
+    if (!khata) throw ApiError.notFound('Customer not found.', 'CUSTOMER_NOT_FOUND');
+    if (khata.type !== 'OFFICE') {
+      throw ApiError.conflict('WRONG_CONSUMER_TYPE', 'This id belongs to an individual, not an office.');
+    }
+    if (khata.billingMode !== 'DIRECT' && khata.billingMode !== 'MIXED') {
+      throw ApiError.conflict(
+        'OFFICE_LEDGER_DISABLED',
+        'This office bills only through its bosses and staff. Change its billing mode to DIRECT or MIXED to bill the office itself.'
+      );
+    }
+    return {
+      khataId: consumerId,
+      bossId: null,
+      payerStaffId: null,
+      consumerName: khata.displayName,
+      context: 'Office account',
+      khata,
+    };
+  }
+
   if (consumerType === 'BOSS') {
     const boss = await Boss.findById(consumerId);
     if (!boss) throw ApiError.notFound('Boss not found.', 'CUSTOMER_NOT_FOUND');
@@ -230,18 +282,21 @@ export async function resolveConsumer(consumerType: ConsumerType, consumerId: st
   if (!staff) throw ApiError.notFound('Staff member not found.', 'CUSTOMER_NOT_FOUND');
   const [khata, boss] = await Promise.all([
     Khata.findById(staff.khataId),
-    Boss.findById(staff.bossId),
+    staff.bossId ? Boss.findById(staff.bossId) : Promise.resolve(null),
   ]);
   if (!khata || khata.type !== 'OFFICE') {
     throw ApiError.conflict('INVALID_OFFICE', 'This staff member does not belong to a valid office.');
   }
-  if (!boss) throw ApiError.conflict('INVALID_BOSS', 'This staff member does not have a valid billing group.');
+  // A boss-less staff member is in the office pool: their OFFICE-responsible
+  // consumption bills the office ledger itself, their SELF consumption bills
+  // their own staff ledger. Both are valid without a boss.
+  if (staff.bossId && !boss) throw ApiError.conflict('INVALID_BOSS', 'This staff member does not have a valid billing group.');
   return {
     khataId: String(khata._id),
-    bossId: String(staff.bossId),
+    bossId: staff.bossId ? String(staff.bossId) : null,
     payerStaffId: staff.billingResponsibility === 'SELF' ? String(staff._id) : null,
     consumerName: staff.name,
-    context: `${khata.displayName} • Boss: ${boss.name}`,
+    context: boss ? `${khata.displayName} • Boss: ${boss.name}` : `${khata.displayName} • Office pool`,
     khata,
     staff,
     boss,

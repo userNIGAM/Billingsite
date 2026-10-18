@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { PageHeader } from '../../../../components/ui/PageHeader';
 import { Card, CardBody, CardHeader } from '../../../../components/ui/Card';
 import { Button } from '../../../../components/ui/Button';
-import { Input, Textarea } from '../../../../components/ui/Input';
+import { Input, Select, Textarea } from '../../../../components/ui/Input';
 import { Badge, statusTone } from '../../../../components/ui/Badge';
 import { Modal } from '../../../../components/ui/Modal';
 import { ConfirmDialog } from '../../../../components/ui/ConfirmDialog';
@@ -59,6 +59,14 @@ export default function KhataDetailPage() {
   }
 
   const { khata, bosses: bossRows, duePaisa, currentPeriod } = detail.data;
+  const billingMode = khata.billingMode ?? (khata.type === 'OFFICE' ? 'MIXED' : null);
+  const isDirectOffice = khata.type === 'OFFICE' && billingMode === 'DIRECT';
+  const isGroupsOffice = khata.type === 'OFFICE' && billingMode === 'GROUPS';
+  const billingModeLabel: Record<string, string> = {
+    DIRECT: 'Office pays directly',
+    GROUPS: 'Bosses and staff only',
+    MIXED: 'Office + bosses + staff',
+  };
 
   async function setStatus(status: 'ACTIVE' | 'OFFLINE') {
     try {
@@ -108,7 +116,17 @@ export default function KhataDetailPage() {
           value={formatNPR(duePaisa)}
           tone={duePaisa > 0 ? 'warning' : 'positive'}
         />
-        <StatCard label="Opening balance" value={formatNPR(khata.openingBalancePaisa)} />
+        <StatCard
+          label={khata.type === 'OFFICE' ? 'Office opening balance' : 'Opening balance'}
+          value={formatNPR(khata.openingBalancePaisa)}
+          hint={
+            khata.type === 'OFFICE'
+              ? isGroupsOffice
+                ? 'GROUPS offices have no office ledger — dues live on bosses and staff'
+                : 'The office’s own ledger; boss and staff openings are on their own rows'
+              : undefined
+          }
+        />
         <StatCard
           label="Current period"
           value={`${formatDate(currentPeriod.periodStart)} – ${formatDate(currentPeriod.periodEnd)}`}
@@ -141,6 +159,14 @@ export default function KhataDetailPage() {
         />
         <CardBody className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           <p><span className="text-gray-500">Type:</span> <Badge tone={khata.type === 'OFFICE' ? 'blue' : 'gray'}>{khata.type}</Badge></p>
+          {khata.type === 'OFFICE' && billingMode ? (
+            <p>
+              <span className="text-gray-500">Billing mode:</span>{' '}
+              <Badge tone={isDirectOffice ? 'green' : isGroupsOffice ? 'amber' : 'blue'}>
+                {billingModeLabel[billingMode] ?? billingMode}
+              </Badge>
+            </p>
+          ) : null}
           <p><span className="text-gray-500">Status:</span> <Badge tone={statusTone(khata.status)}>{khata.status}</Badge></p>
           <p><span className="text-gray-500">Start date:</span> {formatDate(khata.startDate)}</p>
           <p><span className="text-gray-500">Billing start day:</span> {khata.billingStartDay}</p>
@@ -187,17 +213,28 @@ export default function KhataDetailPage() {
         )}
       </Card>
 
-      {khata.type === 'OFFICE' ? (
+      {khata.type === 'OFFICE' && !isDirectOffice ? (
         <Card>
           <CardHeader
             title="Bosses"
-            subtitle={`${bossRows.length} boss${bossRows.length === 1 ? '' : 'es'}`}
+            subtitle={
+              isGroupsOffice
+                ? `${bossRows.length} boss${bossRows.length === 1 ? '' : 'es'} — the office itself never pays`
+                : `${bossRows.length} boss${bossRows.length === 1 ? '' : 'es'}`
+            }
             action={<Button size="sm" onClick={() => setBossOpen(true)}>Add boss</Button>}
           />
           {bosses.loading ? (
             <LoadingState />
           ) : bossRows.length === 0 ? (
-            <EmptyState title="No bosses yet" description="Add a boss to group staff under this office." />
+            <EmptyState
+              title="No bosses yet"
+              description={
+                isGroupsOffice
+                  ? 'A GROUPS office bills only through its bosses and their staff — add one to start billing.'
+                  : 'Add a boss who settles bills for their staff, or keep the office paying directly.'
+              }
+            />
           ) : (
             <Table>
               <THead>
@@ -210,13 +247,14 @@ export default function KhataDetailPage() {
                 </Tr>
               </THead>
               <TBody>
-                {bossRows.map((b) => (
+                {[...bossRows]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((b) => (
                   <Tr key={b._id}>
                     <Td>
                       <Link href={`/offices/${b._id}`} className="font-medium text-brand-700 hover:underline">
                         {b.name}
                       </Link>
-                      {b.isDefault ? <Badge className="ml-2" tone="gray">Default</Badge> : null}
                     </Td>
                     <Td><Badge tone={statusTone(b.status)}>{b.status}</Badge></Td>
                     <Td align="right">{b.staffCount ?? 0}</Td>
@@ -267,6 +305,8 @@ export default function KhataDetailPage() {
       <EditKhataModal
         open={editOpen}
         khataId={id}
+        isOffice={khata.type === 'OFFICE'}
+        isGroups={isGroupsOffice}
         initial={{ displayName: khata.displayName, phone: khata.phone, address: khata.address, notes: khata.notes, openingBalancePaisa: khata.openingBalancePaisa }}
         onClose={() => setEditOpen(false)}
         onSaved={() => {
@@ -301,12 +341,16 @@ export default function KhataDetailPage() {
 function EditKhataModal({
   open,
   khataId,
+  isOffice,
+  isGroups,
   initial,
   onClose,
   onSaved,
 }: {
   open: boolean;
   khataId: string;
+  isOffice: boolean;
+  isGroups: boolean;
   initial: { displayName: string; phone: string; address: string; notes: string; openingBalancePaisa: number };
   onClose: () => void;
   onSaved: () => void;
@@ -329,7 +373,8 @@ function EditKhataModal({
         phone: phone.trim(),
         address: address.trim(),
         notes: notes.trim(),
-        openingBalancePaisa: rupeesToPaisa(Number(openingBalance) || 0),
+        // A GROUPS office has no ledger of its own; its opening stays 0.
+        ...(isGroups ? {} : { openingBalancePaisa: rupeesToPaisa(Number(openingBalance) || 0) }),
       });
       toast.success('Khata updated.');
       onSaved();
@@ -355,7 +400,21 @@ function EditKhataModal({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Input label="Display name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="sm:col-span-2" />
         <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        <Input label="Opening balance (NPR)" type="number" step="0.01" value={openingBalance} onChange={(e) => setOpeningBalance(e.target.value)} />
+        <Input
+          label={isOffice ? 'Office opening balance (NPR)' : 'Opening balance (NPR)'}
+          type="number"
+          step="0.01"
+          value={isGroups ? '0' : openingBalance}
+          disabled={isGroups}
+          onChange={(e) => setOpeningBalance(e.target.value)}
+          hint={
+            isGroups
+              ? 'A GROUPS office has no ledger of its own — dues live on bosses and staff.'
+              : isOffice
+                ? 'The office’s own migrated due. Edit a boss’s due on that boss.'
+                : undefined
+          }
+        />
         <Input label="Address" value={address} onChange={(e) => setAddress(e.target.value)} className="sm:col-span-2" />
         <div className="sm:col-span-2">
           <Textarea label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
@@ -364,6 +423,15 @@ function EditKhataModal({
       {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
     </Modal>
   );
+}
+
+interface BossStaffRow {
+  key: string;
+  name: string;
+  phone: string;
+  address: string;
+  billingResponsibility: 'OFFICE' | 'SELF';
+  openingBalance: string;
 }
 
 function AddBossModal({
@@ -380,27 +448,85 @@ function AddBossModal({
   const toast = useToast();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [openingBalance, setOpeningBalance] = useState('0');
   const [notes, setNotes] = useState('');
+  const [staffRows, setStaffRows] = useState<BossStaffRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  function addStaffRow() {
+    setStaffRows((rows) => [
+      ...rows,
+      {
+        key: crypto.randomUUID(),
+        name: '',
+        phone: '',
+        address: '',
+        billingResponsibility: 'OFFICE',
+        openingBalance: '0',
+      },
+    ]);
+  }
+
+  function updateStaffRow(key: string, patch: Partial<BossStaffRow>) {
+    setStaffRows((rows) => rows.map((row) => (row.key === key ? { ...row, ...patch } : row)));
+  }
+
+  function removeStaffRow(key: string) {
+    setStaffRows((rows) => rows.filter((row) => row.key !== key));
+  }
+
+  function resetForm() {
+    setName('');
+    setPhone('');
+    setAddress('');
+    setOpeningBalance('0');
+    setNotes('');
+    setStaffRows([]);
+    setError('');
+  }
 
   async function save() {
     if (!name.trim()) {
       setError('A name is required.');
       return;
     }
+    if (staffRows.some((row) => !row.name.trim())) {
+      setError('Every staff row needs a name, or remove the empty one.');
+      return;
+    }
     setSaving(true);
     setError('');
     try {
-      await khataService.createBoss(khataId, {
+      const boss = await khataService.createBoss(khataId, {
         name: name.trim(),
         phone: phone.trim() || undefined,
+        address: address.trim() || undefined,
+        openingBalancePaisa: rupeesToPaisa(Number(openingBalance) || 0),
         notes: notes.trim() || undefined,
       });
-      toast.success('Boss added.');
-      setName('');
-      setPhone('');
-      setNotes('');
+      // Each staff is created under this boss, so it only ever belongs to them.
+      for (const row of staffRows) {
+        await khataService.createStaff({
+          khataId,
+          bossId: boss._id,
+          name: row.name.trim(),
+          phone: row.phone.trim() || undefined,
+          address: row.address.trim() || undefined,
+          billingResponsibility: row.billingResponsibility,
+          openingBalancePaisa:
+            row.billingResponsibility === 'SELF'
+              ? rupeesToPaisa(Number(row.openingBalance) || 0)
+              : 0,
+        });
+      }
+      toast.success(
+        staffRows.length > 0
+          ? `Boss added with ${staffRows.length} staff.`
+          : 'Boss added.'
+      );
+      resetForm();
       onSaved();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not add the boss.');
@@ -422,9 +548,85 @@ function AddBossModal({
       }
     >
       <div className="flex flex-col gap-3">
-        <Input label="Name" required value={name} onChange={(e) => setName(e.target.value)} />
+        <Input label="Boss name" required value={name} onChange={(e) => setName(e.target.value)} />
         <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <Input label="Address" value={address} onChange={(e) => setAddress(e.target.value)} />
+        <Input
+          label="Opening balance (NPR)"
+          type="number"
+          step="0.01"
+          value={openingBalance}
+          onChange={(e) => setOpeningBalance(e.target.value)}
+          hint="Migrated due for this boss, carried into their first group bill."
+        />
         <Textarea label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+
+        <div className="rounded-lg border border-gray-200 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-700">Staff under this boss</p>
+            <Button type="button" variant="secondary" size="sm" onClick={addStaffRow} disabled={saving}>
+              Add staff
+            </Button>
+          </div>
+
+          {staffRows.length === 0 ? (
+            <p className="text-xs text-gray-500">
+              Optional — add staff now with their name, phone, address and any opening balance, or add them later from
+              the boss page.
+            </p>
+          ) : null}
+
+          <div className="flex flex-col gap-3">
+            {staffRows.map((row, index) => (
+              <div key={row.key} className="flex flex-col gap-2 rounded-md border border-gray-200 p-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr,1fr,auto]">
+                  <Input
+                    label={`Staff ${index + 1} name`}
+                    required
+                    value={row.name}
+                    onChange={(e) => updateStaffRow(row.key, { name: e.target.value })}
+                  />
+                  <Input
+                    label="Phone"
+                    value={row.phone}
+                    onChange={(e) => updateStaffRow(row.key, { phone: e.target.value })}
+                  />
+                  <div className="flex items-end">
+                    <Button type="button" variant="ghost" size="sm" onClick={() => removeStaffRow(row.key)} disabled={saving}>
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+                <Input
+                  label="Address"
+                  value={row.address}
+                  onChange={(e) => updateStaffRow(row.key, { address: e.target.value })}
+                />
+                <div className={`grid grid-cols-1 gap-2 ${row.billingResponsibility === 'SELF' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+                  <Select
+                    label="Who pays for orders?"
+                    value={row.billingResponsibility}
+                    onChange={(e) =>
+                      updateStaffRow(row.key, { billingResponsibility: e.target.value as 'OFFICE' | 'SELF' })
+                    }
+                  >
+                    <option value="OFFICE">Boss pays (office)</option>
+                    <option value="SELF">Staff pays personally</option>
+                  </Select>
+                  {row.billingResponsibility === 'SELF' ? (
+                    <Input
+                      label="Opening balance (NPR)"
+                      type="number"
+                      step="0.01"
+                      value={row.openingBalance}
+                      onChange={(e) => updateStaffRow(row.key, { openingBalance: e.target.value })}
+                    />
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
       {error ? <p className="mt-3 text-xs text-red-600">{error}</p> : null}
     </Modal>

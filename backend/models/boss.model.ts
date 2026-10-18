@@ -12,6 +12,9 @@ const bossSchema = new Schema(
     // search for "ram" never matched "Ram Bahadur".
     searchName: { type: String, required: true, lowercase: true, trim: true },
     phone: { type: String, default: '', maxlength: 40 },
+    address: { type: String, default: '', maxlength: 200 },
+    // Migrated paper due carried into this boss's first group bill.
+    openingBalancePaisa: { type: Number, default: 0, min: 0 },
     isDefault: { type: Boolean, default: false }, // the "Office Direct" group
     status: { type: String, enum: BOSS_STATUSES, default: 'ACTIVE' },
     startDate: { type: String, required: true }, // YYYY-MM-DD

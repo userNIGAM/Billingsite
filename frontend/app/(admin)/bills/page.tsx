@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
@@ -130,7 +130,12 @@ function BillsView() {
 
       <GenerateBillModal
         open={generateOpen}
-        khatas={(khatas.data ?? []).map((k) => ({ _id: k._id, name: k.displayName, type: k.type }))}
+        khatas={(khatas.data ?? []).map((k) => ({
+          _id: k._id,
+          name: k.displayName,
+          type: k.type,
+          billingMode: k.billingMode ?? null,
+        }))}
         onClose={() => setGenerateOpen(false)}
         onGenerated={(billId) => {
           setGenerateOpen(false);
@@ -150,7 +155,7 @@ function GenerateBillModal({
   onGenerated,
 }: {
   open: boolean;
-  khatas: Array<{ _id: string; name: string; type: string }>;
+  khatas: Array<{ _id: string; name: string; type: string; billingMode: string | null }>;
   onClose: () => void;
   onGenerated: (billId: string) => void;
 }) {
@@ -162,22 +167,33 @@ function GenerateBillModal({
   const [error, setError] = useState('');
 
   const selected = khatas.find((k) => k._id === khataId);
+  const selectedBillingMode = selected?.billingMode ?? (selected?.type === 'OFFICE' ? 'MIXED' : null);
+  const officeHasOwnLedger = selectedBillingMode === 'DIRECT' || selectedBillingMode === 'MIXED';
 
   const detail = useAsync((signal) => khataService.detail(khataId, signal), [khataId], { enabled: Boolean(khataId) });
+  const fetchOfficeGroups = Boolean(khataId) && selected?.type === 'OFFICE' && selectedBillingMode !== 'DIRECT';
   const bosses = useAsync(
     (signal) => khataService.listBosses(khataId, signal),
     [khataId],
-    { enabled: Boolean(khataId) && selected?.type === 'OFFICE' }
+    { enabled: fetchOfficeGroups }
   );
   const staff = useAsync(
     (signal) => khataService.listStaff({ khataId, status: 'ACTIVE' }, signal),
     [khataId],
-    { enabled: Boolean(khataId) && selected?.type === 'OFFICE' }
+    { enabled: fetchOfficeGroups }
   );
   const selfPayingStaff = (staff.data ?? []).filter((person) => person.billingResponsibility === 'SELF');
 
+  // A DIRECT office bills only itself — preselect that payer.
+  useEffect(() => {
+    if (selected?.type === 'OFFICE' && selectedBillingMode === 'DIRECT') {
+      setOfficePayer('office');
+    }
+  }, [selected?.type, selectedBillingMode]);
+
   const selectedBossId = officePayer.startsWith('boss:') ? officePayer.slice(5) : undefined;
   const selectedStaffId = officePayer.startsWith('staff:') ? officePayer.slice(6) : undefined;
+  // officePayer === 'office' bills the office's own ledger (bossId and staffId null).
   const currentDate = todayBusinessDate();
   const currentBillingPeriodStart = detail.data?.currentPeriod.periodStart;
   const previousPayments = useAsync(
@@ -206,7 +222,7 @@ function GenerateBillModal({
   async function save() {
     if (!khataId) { setError('Choose a khata.'); return; }
     if (selected?.type === 'OFFICE' && !officePayer) {
-      setError('Choose an office group or a self-paying staff member.');
+      setError('Choose who is billed — the office, a boss, or a self-paying staff member.');
       return;
     }
     if (!periodStart || !periodEnd) { setError('Set the billing period.'); return; }
@@ -215,8 +231,8 @@ function GenerateBillModal({
     try {
       const { bill } = await billService.generate({
         khataId,
-        bossId: officePayer.startsWith('boss:') ? officePayer.slice(5) : null,
-        staffId: officePayer.startsWith('staff:') ? officePayer.slice(6) : null,
+        bossId: selectedBossId ?? null,
+        staffId: selectedStaffId ?? null,
         periodStart,
         periodEnd,
       });
@@ -249,17 +265,33 @@ function GenerateBillModal({
         </Select>
 
         {selected?.type === 'OFFICE' ? (
-          <Select label="Bill payer" required value={officePayer} onChange={(e) => setOfficePayer(e.target.value)}>
+          <Select
+            label="Bill payer"
+            required
+            value={officePayer}
+            onChange={(e) => setOfficePayer(e.target.value)}
+          >
             <option value="">Choose who is billed…</option>
-            <optgroup label="Office-paid groups">
-              {(bosses.data ?? []).map((b) => (
-                <option key={b._id} value={`boss:${b._id}`}>{b.name}</option>
-              ))}
-            </optgroup>
+            {officeHasOwnLedger ? (
+              <optgroup label="Office itself">
+                <option value="office">{selected.name} — office pays directly</option>
+              </optgroup>
+            ) : null}
+            {(bosses.data ?? []).length > 0 && (
+              <optgroup label="Bosses">
+                {[...(bosses.data ?? [])]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((b) => (
+                    <option key={b._id} value={`boss:${b._id}`}>{b.name}</option>
+                  ))}
+              </optgroup>
+            )}
             {selfPayingStaff.length > 0 && (
               <optgroup label="Staff who pay personally">
                 {selfPayingStaff.map((person) => (
-                  <option key={person._id} value={`staff:${person._id}`}>{person.name} — {person.bossName}</option>
+                  <option key={person._id} value={`staff:${person._id}`}>
+                    {person.name}{person.bossName ? ` — ${person.bossName}` : ' — office pool'}
+                  </option>
                 ))}
               </optgroup>
             )}

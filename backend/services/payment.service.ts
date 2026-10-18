@@ -66,22 +66,26 @@ export async function recordPayment(input: RecordPaymentInput, admin: CurrentAdm
         });
         if (!hasOpenStaffLedger) {
         throw ApiError.conflict('STAFF_NOT_SELF_BILLED', 'This staff member has no separate personal balance.');
-        }
+      }
       }
       if (input.bossId && String(staff.bossId) !== input.bossId) {
         throw ApiError.conflict('STAFF_BOSS_MISMATCH', 'Selected staff member does not belong to this billing group.');
       }
+      // Null for office-pool staff: the payment keys on staffId alone.
       staffId = staff._id;
-      bossId = staff.bossId;
+      bossId = staff.bossId ?? null;
       payerNameSnapshot = `${khata.displayName} — ${staff.name}`;
+    } else if (input.bossId) {
+      const boss = await Boss.findOne({ _id: input.bossId, khataId: khata._id });
+      if (!boss) throw ApiError.notFound('Boss not found for this office.', 'BOSS_NOT_FOUND');
+      bossId = boss._id;
+      payerNameSnapshot = `${khata.displayName} — ${boss.name}`;
+    } else if (khata.billingMode === 'DIRECT' || khata.billingMode === 'MIXED') {
+      // No boss, no staff: payment against the office's own ledger
+      // (bossId/staffId null) — same key its DIRECT/MIXED bills use.
+      payerNameSnapshot = khata.displayName;
     } else {
-    if (!input.bossId) {
       throw ApiError.badRequest('BOSS_REQUIRED', 'Payments for an office must specify the boss/billing group.');
-    }
-    const boss = await Boss.findOne({ _id: input.bossId, khataId: khata._id });
-    if (!boss) throw ApiError.notFound('Boss not found for this office.', 'BOSS_NOT_FOUND');
-    bossId = boss._id;
-    payerNameSnapshot = `${khata.displayName} — ${boss.name}`;
     }
   } else if (input.staffId) {
     throw ApiError.badRequest('INDIVIDUAL_HAS_NO_STAFF', 'Individual khatas cannot use office staff balances.');

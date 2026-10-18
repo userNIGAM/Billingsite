@@ -1,6 +1,7 @@
 import { apiClient } from '../apiClient';
 import { paged, unwrap, type ListResult } from './base';
 import type {
+  BillingMode,
   Khata,
   KhataStatus,
   KhataType,
@@ -53,13 +54,25 @@ export interface CreateKhataInput {
   billingStartDay?: number;
   openingBalancePaisa?: number;
   notes?: string;
+  /** Offices only. Which payers the office supports (default MIXED). */
+  billingMode?: BillingMode;
   defaultStaffBillingResponsibility?: 'OFFICE' | 'SELF';
-  initialBoss?: { name: string; phone?: string };
-  initialStaff?: Array<{ name: string; phone?: string; billingResponsibility?: 'OFFICE' | 'SELF' }>;
+  initialBoss?: { name: string; phone?: string; address?: string; openingBalancePaisa?: number };
+  initialBosses?: Array<{ name: string; phone?: string; address?: string; openingBalancePaisa?: number }>;
+  initialStaff?: Array<{
+    name: string;
+    phone?: string;
+    address?: string;
+    billingResponsibility?: 'OFFICE' | 'SELF';
+    /** Index into the combined named-boss list; omitted = office pool. */
+    bossIndex?: number;
+    openingBalancePaisa?: number;
+  }>;
 }
 
 export interface CreateKhataResult {
   khata: Khata;
+  /** Always null now — no hidden default boss is created. Kept for compatibility. */
   defaultBossId: string | null;
   duePaisa: number;
 }
@@ -70,6 +83,8 @@ export interface UpdateKhataInput {
   address?: string;
   startDate?: string;
   billingStartDay?: number;
+  /** Offices only; guarded transitions live in the backend. */
+  billingMode?: BillingMode;
   openingBalancePaisa?: number;
   notes?: string;
 }
@@ -127,7 +142,7 @@ export const khataService = {
 
   async createBoss(
     khataId: string,
-    input: { name: string; phone?: string; notes?: string; startDate?: string }
+    input: { name: string; phone?: string; address?: string; openingBalancePaisa?: number; notes?: string; startDate?: string }
   ): Promise<Boss> {
     const data = await apiClient.post<{ boss: Boss }>(`/bosses/offices/${khataId}/bosses`, {
       khataId,
@@ -140,7 +155,7 @@ export const khataService = {
     return apiClient.get<BossSummary>(`/bosses/${bossId}/summary`, undefined, signal);
   },
 
-  async updateBoss(bossId: string, input: { name?: string; phone?: string; notes?: string }): Promise<Boss> {
+  async updateBoss(bossId: string, input: { name?: string; phone?: string; address?: string; openingBalancePaisa?: number; notes?: string }): Promise<Boss> {
     const data = await apiClient.patch<{ boss: Boss }>(`/bosses/${bossId}`, input);
     return unwrap<Boss>(data, 'boss');
   },
@@ -175,7 +190,9 @@ export const khataService = {
     bossId?: string;
     name: string;
     billingResponsibility?: 'OFFICE' | 'SELF';
+    openingBalancePaisa?: number;
     phone?: string;
+    address?: string;
     startDate?: string;
     notes?: string;
   }): Promise<Staff> {
@@ -185,14 +202,17 @@ export const khataService = {
 
   async updateStaff(
     staffId: string,
-    input: { name?: string; phone?: string; notes?: string; billingResponsibility?: 'OFFICE' | 'SELF' }
+    input: { name?: string; phone?: string; address?: string; notes?: string; billingResponsibility?: 'OFFICE' | 'SELF'; openingBalancePaisa?: number }
   ): Promise<Staff> {
     const data = await apiClient.patch<{ staff: Staff }>(`/staff/${staffId}`, input);
     return unwrap<Staff>(data, 'staff');
   },
 
-  /** Moves staff to a different boss; historical transactions keep their bossId. */
-  async transferStaff(staffId: string, bossId: string): Promise<Staff> {
+  /**
+   * Moves staff to a different boss, or into the office pool (bossId null,
+   * MIXED offices only); historical transactions keep their bossId.
+   */
+  async transferStaff(staffId: string, bossId: string | null): Promise<Staff> {
     const data = await apiClient.patch<{ staff: Staff }>(`/staff/${staffId}/transfer`, { bossId });
     return unwrap<Staff>(data, 'staff');
   },

@@ -6,6 +6,8 @@ export const createBossSchema = z.object({
   khataId: objectId.optional(),
   name: z.string().trim().min(1, 'Boss name is required').max(120),
   phone: z.string().trim().max(40).optional().default(''),
+  address: z.string().trim().max(200).optional().default(''),
+  openingBalancePaisa: z.coerce.number().int().min(0).optional().default(0),
   startDate: dateStr.optional(),
   notes: z.string().trim().max(500).optional().default(''),
 });
@@ -13,6 +15,8 @@ export const createBossSchema = z.object({
 export const updateBossSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   phone: z.string().trim().max(40).optional(),
+  address: z.string().trim().max(200).optional(),
+  openingBalancePaisa: z.coerce.number().int().min(0).optional(),
   startDate: dateStr.optional(),
   endDate: dateStr.nullable().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),

@@ -9,7 +9,9 @@
     "start": "node dist/server.js",
     "lint": "eslint . --ext .ts",
     "test": "jest --runInBand",
-    "seed": "tsx seed/seed.ts"
+    "seed": "tsx seed/seed.ts",
+    "seed:khatas": "tsx seed/khatas.ts",
+    "migrate:office-direct": "tsx seed/migrate-office-direct.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
